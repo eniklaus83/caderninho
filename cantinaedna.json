@@ -1,46 +1,5 @@
 {
-  "clients": [
-    {
-      "name": "Ernesto Niklaus",
-      "phone": "(11) 971110901",
-      "credit": 0
-    },
-    {
-      "name": "Benjamin Niklaus",
-      "phone": "11 97111-0701",
-      "credit": 0
-    },
-    {
-      "name": "Erywan Freitas",
-      "phone": "",
-      "credit": 0
-    },
-    {
-      "name": "Ana Freitas",
-      "phone": "",
-      "credit": 0
-    },
-    {
-      "name": "Ana Froes",
-      "phone": "",
-      "credit": 0
-    },
-    {
-      "name": "Ricardo Froes",
-      "phone": "",
-      "credit": 0
-    },
-    {
-      "name": "Márcio Prampolim",
-      "phone": "",
-      "credit": 0
-    }
-  ],
-  "products": [
-    {
-      "name": "Coca-Cola",
-      "price": 10
-    }
-  ],
+  "clients": [],
+  "products": [],
   "orders": []
 }
