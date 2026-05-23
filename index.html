@@ -1,501 +1,539 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>POS - Pedidos</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://cdn.jsdelivr.net/npm/lucide-icons@0.477.0/dist/umd/lucide.js" rel="preload" as="script">
-<script src="https://cdn.jsdelivr.net/npm/lucide-icons@0.477.0/dist/umd/lucide.js"></script>
-<style>
-  body { font-family: 'Inter', sans-serif; }
-  .scrollbar-hide::-webkit-scrollbar { display: none; }
-  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bar e Restaurante - Sistema</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f172a;
+            color: #f1f5f9;
+            padding-bottom: 80px;
+        }
+        .app {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+        h1, h2 {
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+            color: #e2e8f0;
+        }
+        .card {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 6px 0;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: #f1f5f9;
+            font-size: 1rem;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1e293b;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            border-top: 1px solid #334155;
+            z-index: 100;
+        }
+        .tab-btn {
+            background: transparent;
+            color: #64748b;
+            font-size: 0.75rem;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            padding: 4px 8px;
+            cursor: pointer;
+        }
+        .tab-btn.active {
+            color: #3b82f6;
+        }
+        .tab-btn i {
+            font-size: 1.3rem;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .item-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .item {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .item-name {
+            font-weight: bold;
+        }
+        .item-price {
+            color: #94a3b8;
+        }
+        .badge {
+            background: #3b82f6;
+            border-radius: 50%;
+            padding: 2px 8px;
+            font-size: 0.75rem;
+        }
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 12px 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            display: none;
+            z-index: 200;
+        }
+        .toast.show {
+            display: block;
+        }
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #334155;
+        }
+        .cart-item button {
+            width: auto;
+            padding: 2px 8px;
+            background: #ef4444;
+            margin: 0;
+        }
+        .total {
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: right;
+            margin-top: 12px;
+        }
+        .negative {
+            color: #ef4444;
+        }
+        .history-item {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+        }
+        .history-item small {
+            color: #94a3b8;
+        }
+        .sync-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .sync-bar button {
+            width: auto;
+            padding: 6px 12px;
+            background: #22c55e;
+        }
+        .sync-bar button:disabled {
+            background: #475569;
+        }
+        @media (max-width: 480px) {
+            .app { padding: 12px; }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
-<body class="bg-slate-950 text-slate-200 min-h-screen flex flex-col">
-<header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur border-b border-slate-800 px-4 py-3 flex items-center justify-between">
-  <h1 class="text-lg font-bold text-amber-400">🍔 POS</h1>
-  <div class="flex items-center gap-3">
-    <span id="githubStatus" class="flex items-center gap-1 text-xs text-slate-400">
-      <i data-lucide="cloud-off" class="w-3 h-3"></i>
-      <span>Offline</span>
-    </span>
-    <button onclick="openModal('settingsModal')" class="p-1.5 rounded-lg hover:bg-slate-800 transition">
-      <i data-lucide="settings" class="w-5 h-5 text-slate-400"></i>
-    </button>
-  </div>
-</header>
-<main class="flex-1 overflow-y-auto pb-20 px-4 py-4 space-y-4" id="mainContent">
-  <!-- Content injected by JS -->
-</main>
-<nav class="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur border-t border-slate-800">
-  <div class="flex justify-around items-center h-16 px-2">
-    <button onclick="switchTab('consumo')" class="tab-btn flex flex-col items-center gap-1 text-xs text-slate-400 hover:text-amber-400 transition" data-tab="consumo">
-      <i data-lucide="coffee" class="w-5 h-5"></i>
-      <span>Consumo</span>
-    </button>
-    <button onclick="switchTab('credito')" class="tab-btn flex flex-col items-center gap-1 text-xs text-slate-400 hover:text-amber-400 transition" data-tab="credito">
-      <i data-lucide="wallet" class="w-5 h-5"></i>
-      <span>Crédito</span>
-    </button>
-    <button onclick="switchTab('clientes')" class="tab-btn flex flex-col items-center gap-1 text-xs text-slate-400 hover:text-amber-400 transition" data-tab="clientes">
-      <i data-lucide="users" class="w-5 h-5"></i>
-      <span>Clientes</span>
-    </button>
-    <button onclick="switchTab('produtos')" class="tab-btn flex flex-col items-center gap-1 text-xs text-slate-400 hover:text-amber-400 transition" data-tab="produtos">
-      <i data-lucide="package" class="w-5 h-5"></i>
-      <span>Produtos</span>
-    </button>
-    <button onclick="switchTab('pedidos')" class="tab-btn flex flex-col items-center gap-1 text-xs text-slate-400 hover:text-amber-400 transition" data-tab="pedidos">
-      <i data-lucide="list-ordered" class="w-5 h-5"></i>
-      <span>Pedidos</span>
-    </button>
-  </div>
-</nav>
+<body>
+    <div class="app">
+        <!-- Toast -->
+        <div id="toast" class="toast"></div>
 
-<!-- Settings Modal -->
-<div id="settingsModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
-  <div class="bg-slate-900 rounded-2xl max-w-md w-full p-6 space-y-4">
-    <h2 class="text-lg font-bold text-amber-400">Configurações</h2>
-    <div>
-      <label class="block text-sm text-slate-400 mb-1">GitHub Token</label>
-      <input type="password" id="githubToken" class="w-full bg-slate-800 rounded-lg p-2 text-sm border border-slate-700 focus:border-amber-500 outline-none" placeholder="token...">
-    </div>
-    <div>
-      <label class="block text-sm text-slate-400 mb-1">Repositório (user/repo)</label>
-      <input type="text" id="githubRepo" class="w-full bg-slate-800 rounded-lg p-2 text-sm border border-slate-700 focus:border-amber-500 outline-none" placeholder="ex: joao/pos-data">
-    </div>
-    <div>
-      <label class="block text-sm text-slate-400 mb-1">Caminho do arquivo (ex: data.json)</label>
-      <input type="text" id="githubFilePath" class="w-full bg-slate-800 rounded-lg p-2 text-sm border border-slate-700 focus:border-amber-500 outline-none" value="data.json">
-    </div>
-    <button onclick="saveSettings()" class="w-full bg-amber-500 hover:bg-amber-600 text-black font-semibold py-2 rounded-lg transition">Salvar</button>
-  </div>
-</div>
-
-<!-- Invoice Modal (for order confirmation) -->
-<div id="invoiceModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
-  <div class="bg-slate-900 rounded-2xl max-w-md w-full p-6 space-y-4 max-h-[80vh] overflow-y-auto">
-    <h2 class="text-lg font-bold text-emerald-400">Revisar Pedido</h2>
-    <div id="invoiceItems" class="space-y-2"></div>
-    <div class="border-t border-slate-700 pt-2 flex justify-between text-sm">
-      <span class="text-slate-400">Total</span>
-      <span id="invoiceTotal" class="font-bold text-emerald-400">R$ 0,00</span>
-    </div>
-    <button onclick="confirmOrder()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-black font-semibold py-2 rounded-lg transition">Confirmar Pedido</button>
-    <button onclick="closeModal('invoiceModal')" class="w-full bg-slate-700 hover:bg-slate-600 text-white py-2 rounded-lg transition">Cancelar</button>
-  </div>
-</div>
-
-<!-- Toast container -->
-<div id="toastContainer" class="fixed top-16 right-4 z-50 space-y-2"></div>
-
-<script>
-// State
-let data = {
-  produtos: [],
-  clientes: [],
-  creditos: [],
-  pedidos: [],
-  saldo: 0
-};
-let cart = [];
-let currentTab = 'consumo';
-let sha = null;
-const GITHUB_API = 'https://api.github.com';
-let token = '';
-let repo = '';
-let filePath = 'data.json';
-
-// Utility
-function escapeHTML(str) {
-  const div = document.createElement('div');
-  div.appendChild(document.createTextNode(str));
-  return div.innerHTML;
-}
-
-function showToast(msg, type = 'info') {
-  const container = document.getElementById('toastContainer');
-  const colors = { info: 'bg-blue-600', success: 'bg-emerald-600', error: 'bg-rose-600' };
-  const toast = document.createElement('div');
-  toast.className = `${colors[type] || 'bg-slate-700'} text-white px-4 py-2 rounded-lg shadow-lg text-sm animate-slide-in`;
-  toast.textContent = msg;
-  container.appendChild(toast);
-  setTimeout(() => toast.remove(), 3000);
-}
-
-function openModal(id) {
-  document.getElementById(id).classList.remove('hidden');
-}
-function closeModal(id) {
-  document.getElementById(id).classList.add('hidden');
-}
-
-// Tab switching
-function switchTab(tab) {
-  currentTab = tab;
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.classList.toggle('text-amber-400', btn.dataset.tab === tab);
-    btn.classList.toggle('text-slate-400', btn.dataset.tab !== tab);
-  });
-  render();
-}
-
-// GitHub operations
-async function fetchGitHub() {
-  if (!token || !repo) return;
-  const url = `${GITHUB_API}/repos/${repo}/contents/${filePath}`;
-  const headers = { 'Authorization': `token ${token}` };
-  try {
-    const resp = await fetch(url, { headers });
-    if (resp.status === 404) {
-      data = { produtos: [], clientes: [], creditos: [], pedidos: [], saldo: 0 };
-      sha = null;
-      document.getElementById('githubStatus').innerHTML = '<i data-lucide="cloud" class="w-3 h-3"></i><span>Online (sem dados)</span>';
-      lucide.createIcons();
-      render();
-      return;
-    }
-    if (!resp.ok) throw new Error('Erro ao buscar dados');
-    const body = await resp.json();
-    sha = body.sha;
-    const content = atob(body.content);
-    data = JSON.parse(content);
-    document.getElementById('githubStatus').innerHTML = '<i data-lucide="cloud" class="w-3 h-3"></i><span>Online</span>';
-    lucide.createIcons();
-    render();
-  } catch (e) {
-    showToast('Erro ao conectar com GitHub: ' + e.message, 'error');
-    document.getElementById('githubStatus').innerHTML = '<i data-lucide="cloud-off" class="w-3 h-3"></i><span>Offline</span>';
-    lucide.createIcons();
-  }
-}
-
-async function saveToGitHub() {
-  if (!token || !repo) {
-    showToast('Configure o GitHub nas configurações', 'error');
-    return;
-  }
-  const url = `${GITHUB_API}/repos/${repo}/contents/${filePath}`;
-  const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
-  const body = { message: 'Atualização POS', content };
-  if (sha) body.sha = sha;
-  try {
-    const resp = await fetch(url, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `token ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(body)
-    });
-    if (!resp.ok) {
-      const err = await resp.json();
-      throw new Error(err.message || 'Erro ao salvar');
-    }
-    const result = await resp.json();
-    sha = result.content.sha;
-    showToast('Dados salvos com sucesso!', 'success');
-  } catch (e) {
-    showToast('Erro ao salvar: ' + e.message, 'error');
-    console.error(e);
-  }
-}
-
-// Cart operations
-function addToCart(produtoId, nome, preco) {
-  if (preco < 0) {
-    showToast('Preço inválido!', 'error');
-    return;
-  }
-  const existing = cart.find(item => item.produtoId === produtoId);
-  if (existing) {
-    existing.quantidade++;
-  } else {
-    cart.push({ produtoId, nome, preco, quantidade: 1 });
-  }
-  showToast(`${escapeHTML(nome)} adicionado ao carrinho`, 'success');
-  render();
-}
-
-function removeFromCart(produtoId) {
-  cart = cart.filter(item => item.produtoId !== produtoId);
-  render();
-}
-
-function updateQuantidade(produtoId, delta) {
-  const item = cart.find(i => i.produtoId === produtoId);
-  if (!item) return;
-  item.quantidade = Math.max(1, item.quantidade + delta);
-  render();
-}
-
-function getTotalCart() {
-  return cart.reduce((sum, item) => sum + item.preco * item.quantidade, 0);
-}
-
-// Order flow
-function showInvoice() {
-  if (cart.length === 0) {
-    showToast('Carrinho vazio!', 'error');
-    return;
-  }
-  const container = document.getElementById('invoiceItems');
-  container.innerHTML = cart.map(item => `<div class="flex justify-between text-sm"><span>${escapeHTML(item.nome)} x${item.quantidade}</span><span>R$ ${(item.preco * item.quantidade).toFixed(2)}</span></div>`).join('');
-  document.getElementById('invoiceTotal').textContent = `R$ ${getTotalCart().toFixed(2)}`;
-  openModal('invoiceModal');
-}
-
-function confirmOrder() {
-  const total = getTotalCart();
-  // Débito do saldo (permitir negativo)
-  data.saldo -= total;
-  // Registrar pedido
-  const pedido = {
-    id: Date.now(),
-    items: cart.map(item => ({ ...item })),
-    total,
-    data: new Date().toISOString()
-  };
-  data.pedidos.push(pedido);
-  cart = [];
-  closeModal('invoiceModal');
-  saveToGitHub();
-  render();
-  showToast(`Pedido confirmado! Saldo: R$ ${data.saldo.toFixed(2)}`, 'success');
-}
-
-// Rendering
-function render() {
-  const main = document.getElementById('mainContent');
-  let html = '';
-  switch (currentTab) {
-    case 'consumo':
-      html = renderConsumo();
-      break;
-    case 'credito':
-      html = renderCredito();
-      break;
-    case 'clientes':
-      html = renderClientes();
-      break;
-    case 'produtos':
-      html = renderProdutos();
-      break;
-    case 'pedidos':
-      html = renderPedidos();
-      break;
-    default:
-      html = '<p class="text-center text-slate-500">Selecione uma aba</p>';
-  }
-  main.innerHTML = html;
-  lucide.createIcons();
-  // Update cart badge
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    if (btn.dataset.tab === 'consumo') {
-      let badge = btn.querySelector('.badge-cart');
-      if (!badge) {
-        badge = document.createElement('span');
-        badge.className = 'badge-cart absolute -top-1 -right-2 bg-rose-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center';
-        btn.appendChild(badge);
-      }
-      badge.textContent = cart.length > 0 ? cart.length : '';
-      badge.classList.toggle('hidden', cart.length === 0);
-    }
-  });
-}
-
-function renderConsumo() {
-  let html = `
-    <div class="bg-slate-900 rounded-2xl p-4 space-y-4">
-      <h2 class="text-lg font-bold text-amber-400">Produtos</h2>
-      <div class="grid grid-cols-2 gap-3">
-        ${data.produtos.map(p => `
-          <div class="bg-slate-800 rounded-xl p-3 flex flex-col items-center text-center">
-            <span class="text-sm font-semibold">${escapeHTML(p.nome)}</span>
-            <span class="text-emerald-400 text-xs">R$ ${p.preco.toFixed(2)}</span>
-            <button onclick="addToCart(${p.id}, '${escapeHTML(p.nome)}', ${p.preco})" class="mt-2 bg-amber-500 hover:bg-amber-600 text-black text-xs font-semibold px-3 py-1 rounded-lg transition">Adicionar</button>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-    <div class="bg-slate-900 rounded-2xl p-4 space-y-3">
-      <h2 class="text-lg font-bold text-amber-400">Carrinho</h2>
-      ${cart.length === 0 ? '<p class="text-sm text-slate-500">Carrinho vazio</p>' : ''}
-      ${cart.map(item => `
-        <div class="flex items-center justify-between bg-slate-800 rounded-xl p-3">
-          <div class="flex-1">
-            <span class="text-sm font-semibold">${escapeHTML(item.nome)}</span>
-            <span class="text-xs text-slate-400">R$ ${item.preco.toFixed(2)} un</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <button onclick="updateQuantidade(${item.produtoId}, -1)" class="bg-slate-700 hover:bg-slate-600 text-white p-1 rounded-lg">-</button>
-            <span class="text-sm font-bold">${item.quantidade}</span>
-            <button onclick="updateQuantidade(${item.produtoId}, 1)" class="bg-slate-700 hover:bg-slate-600 text-white p-1 rounded-lg">+</button>
-            <button onclick="removeFromCart(${item.produtoId})" class="text-rose-400 hover:text-rose-300 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-          </div>
+        <!-- Tabs Content -->
+        <div id="tabConsumo" class="tab-content active">
+            <h1>Consumo</h1>
+            <div id="consumoContent"></div>
         </div>
-      `).join('')}
-      ${cart.length > 0 ? `
-        <div class="flex justify-between items-center pt-2 border-t border-slate-700">
-          <span class="text-sm font-bold">Total: R$ ${getTotalCart().toFixed(2)}</span>
-          <button onclick="showInvoice()" class="bg-emerald-500 hover:bg-emerald-600 text-black font-semibold px-4 py-2 rounded-lg transition">Fechar Pedido</button>
+        <div id="tabCredito" class="tab-content">
+            <h1>Crédito</h1>
+            <div id="creditoContent"></div>
         </div>
-      ` : ''}
-    </div>
-    <div class="bg-slate-900 rounded-2xl p-4">
-      <h2 class="text-lg font-bold text-amber-400 mb-2">Saldo</h2>
-      <p class="text-2xl font-bold ${data.saldo >= 0 ? 'text-emerald-400' : 'text-rose-400'}">R$ ${data.saldo.toFixed(2)}</p>
-    </div>
-  `;
-  return html;
-}
-
-function renderCredito() {
-  return `
-    <div class="bg-slate-900 rounded-2xl p-4 space-y-4">
-      <h2 class="text-lg font-bold text-amber-400">Crédito</h2>
-      <div>
-        <label class="block text-sm text-slate-400 mb-1">Valor para adicionar</label>
-        <input type="number" id="creditoValor" class="w-full bg-slate-800 rounded-lg p-2 text-sm border border-slate-700 focus:border-amber-500 outline-none" placeholder="0.00" step="0.01">
-        <button onclick="adicionarCredito()" class="mt-2 bg-amber-500 hover:bg-amber-600 text-black font-semibold px-4 py-2 rounded-lg transition">Adicionar</button>
-      </div>
-      <div>
-        <h3 class="text-sm font-semibold text-slate-400">Histórico</h3>
-        <ul class="space-y-1 mt-2">
-          ${data.creditos.slice().reverse().map(c => `<li class="text-sm text-slate-300">+R$ ${c.valor.toFixed(2)} - ${new Date(c.data).toLocaleString('pt-BR')}</li>`).join('')}
-        </ul>
-      </div>
-    </div>
-  `;
-}
-
-function renderClientes() {
-  return `
-    <div class="bg-slate-900 rounded-2xl p-4 space-y-4">
-      <h2 class="text-lg font-bold text-amber-400">Clientes</h2>
-      <div class="flex gap-2">
-        <input type="text" id="clienteNome" class="flex-1 bg-slate-800 rounded-lg p-2 text-sm border border-slate-700 focus:border-amber-500 outline-none" placeholder="Nome">
-        <button onclick="adicionarCliente()" class="bg-amber-500 hover:bg-amber-600 text-black font-semibold px-4 py-2 rounded-lg transition">+</button>
-      </div>
-      <ul class="space-y-2">
-        ${data.clientes.map(c => `<li class="bg-slate-800 rounded-xl p-3 flex justify-between items-center"><span>${escapeHTML(c.nome)}</span><button onclick="removerCliente(${c.id})" class="text-rose-400 hover:text-rose-300"><i data-lucide="x" class="w-4 h-4"></i></button></li>`).join('')}
-      </ul>
-    </div>
-  `;
-}
-
-function renderProdutos() {
-  return `
-    <div class="bg-slate-900 rounded-2xl p-4 space-y-4">
-      <h2 class="text-lg font-bold text-amber-400">Produtos</h2>
-      <div class="grid grid-cols-2 gap-2">
-        <input type="text" id="produtoNome" class="bg-slate-800 rounded-lg p-2 text-sm border border-slate-700 focus:border-amber-500 outline-none" placeholder="Nome">
-        <input type="number" id="produtoPreco" class="bg-slate-800 rounded-lg p-2 text-sm border border-slate-700 focus:border-amber-500 outline-none" placeholder="Preço" step="0.01">
-      </div>
-      <button onclick="adicionarProduto()" class="w-full bg-amber-500 hover:bg-amber-600 text-black font-semibold py-2 rounded-lg transition">Adicionar Produto</button>
-      <ul class="space-y-2">
-        ${data.produtos.map(p => `<li class="bg-slate-800 rounded-xl p-3 flex justify-between items-center"><span>${escapeHTML(p.nome)}</span><span class="text-emerald-400 text-sm">R$ ${p.preco.toFixed(2)}</span><button onclick="removerProduto(${p.id})" class="text-rose-400 hover:text-rose-300"><i data-lucide="x" class="w-4 h-4"></i></button></li>`).join('')}
-      </ul>
-    </div>
-  `;
-}
-
-function renderPedidos() {
-  return `
-    <div class="bg-slate-900 rounded-2xl p-4 space-y-4">
-      <h2 class="text-lg font-bold text-amber-400">Histórico de Pedidos</h2>
-      ${data.pedidos.length === 0 ? '<p class="text-sm text-slate-500">Nenhum pedido registrado</p>' : ''}
-      ${data.pedidos.slice().reverse().map(p => `
-        <div class="bg-slate-800 rounded-xl p-3 space-y-1">
-          <div class="flex justify-between text-sm">
-            <span class="font-semibold">Pedido #${p.id}</span>
-            <span class="text-emerald-400">R$ ${p.total.toFixed(2)}</span>
-          </div>
-          <div class="text-xs text-slate-400">${new Date(p.data).toLocaleString('pt-BR')}</div>
-          <ul class="text-xs text-slate-300 list-disc list-inside">
-            ${p.items.map(item => `<li>${escapeHTML(item.nome)} x${item.quantidade} - R$ ${(item.preco * item.quantidade).toFixed(2)}</li>`).join('')}
-          </ul>
+        <div id="tabClientes" class="tab-content">
+            <h1>Clientes</h1>
+            <div id="clientesContent"></div>
         </div>
-      `).join('')}
+        <div id="tabProdutos" class="tab-content">
+            <h1>Produtos</h1>
+            <div id="produtosContent"></div>
+        </div>
+        <div id="tabPedidos" class="tab-content">
+            <h1>Pedidos</h1>
+            <div id="pedidosContent"></div>
+        </div>
     </div>
-}
 
-// Actions
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+        <button class="tab-btn active" data-tab="tabConsumo"><i class="fas fa-utensils"></i><span>Consumo</span></button>
+        <button class="tab-btn" data-tab="tabCredito"><i class="fas fa-coins"></i><span>Crédito</span></button>
+        <button class="tab-btn" data-tab="tabClientes"><i class="fas fa-users"></i><span>Clientes</span></button>
+        <button class="tab-btn" data-tab="tabProdutos"><i class="fas fa-box"></i><span>Produtos</span></button>
+        <button class="tab-btn" data-tab="tabPedidos"><i class="fas fa-history"></i><span>Pedidos</span></button>
+    </div>
 
-function adicionarCredito() {
-  const valor = parseFloat(document.getElementById('creditoValor').value);
-  if (isNaN(valor) || valor <= 0) {
-    showToast('Valor inválido', 'error');
-    return;
-  }
-  data.saldo += valor;
-  data.creditos.push({ valor, data: new Date().toISOString() });
-  saveToGitHub();
-  render();
-  showToast(`Crédito de R$ ${valor.toFixed(2)} adicionado!`, 'success');
-}
+    <script>
+        // ====== State ======
+        let clientes = [
+            { id: 1, nome: 'João', saldo: 50 },
+            { id: 2, nome: 'Maria', saldo: -10 }
+        ];
+        let produtos = [
+            { id: 1, nome: 'Cerveja', preco: 8 },
+            { id: 2, nome: 'Refrigerante', preco: 5 },
+            { id: 3, nome: 'Porção de Batata', preco: 15 }
+        ];
+        let pedidos = [
+            { id: 1, clienteId: 1, items: [{ produtoId: 1, quantidade: 2 }], total: 16, data: new Date().toISOString() }
+        ];
+        let carrinho = [];
+        let clienteSelecionado = 1;
 
-function adicionarCliente() {
-  const nome = document.getElementById('clienteNome').value.trim();
-  if (!nome) {
-    showToast('Nome inválido', 'error');
-    return;
-  }
-  const id = Date.now();
-  data.clientes.push({ id, nome });
-  document.getElementById('clienteNome').value = '';
-  saveToGitHub();
-  render();
-  showToast('Cliente adicionado!', 'success');
-}
+        // ====== Toast ======
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
 
-function removerCliente(id) {
-  data.clientes = data.clientes.filter(c => c.id !== id);
-  saveToGitHub();
-  render();
-}
+        // ====== Rendering Functions (CORRECTED TEMPLATE LITERALS) ======
+        function renderConsumo() {
+            const container = document.getElementById('consumoContent');
+            const cliente = clientes.find(c => c.id === clienteSelecionado);
+            if (!cliente) return;
+            let html = `<div class="card">
+                <h2>Cliente: ${cliente.nome}</h2>
+                <p>Saldo: <span class="${cliente.saldo < 0 ? 'negative' : ''}">R$ ${cliente.saldo.toFixed(2)}</span></p>
+                <label for="clienteSelect">Selecionar Cliente:</label>
+                <select id="clienteSelect" onchange="clienteSelecionado = parseInt(this.value); renderConsumo();">
+                    ${clientes.map(c => `<option value="${c.id}" ${c.id === clienteSelecionado ? 'selected' : ''}>${c.nome}</option>`).join('')}
+                </select>
+            </div>`;
+            html += `<div class="card">
+                <h2>Produtos</h2>
+                <div class="item-list">
+                    ${produtos.map(p => `<div class="item">
+                        <div>
+                            <div class="item-name">${p.nome}</div>
+                            <div class="item-price">R$ ${p.preco.toFixed(2)}</div>
+                        </div>
+                        <button onclick="adicionarAoCarrinho(${p.id})">+</button>
+                    </div>`).join('')}
+                </div>
+            </div>`;
+            html += `<div class="card">
+                <h2>Carrinho</h2>
+                <div id="carrinhoItems">
+                    ${carrinho.length === 0 ? '<p>Carrinho vazio</p>' : carrinho.map(item => {
+                        const prod = produtos.find(p => p.id === item.produtoId);
+                        return `<div class="cart-item">
+                            <span>${prod.nome} x${item.quantidade}</span>
+                            <span>R$ ${(prod.preco * item.quantidade).toFixed(2)}</span>
+                            <button onclick="removerDoCarrinho(${item.produtoId})">x</button>
+                        </div>`;
+                    }).join('')}
+                </div>
+                <div class="total">Total: R$ ${carrinho.reduce((sum, item) => {
+                    const prod = produtos.find(p => p.id === item.produtoId);
+                    return sum + (prod ? prod.preco * item.quantidade : 0);
+                }, 0).toFixed(2)}</div>
+                <button onclick="finalizarPedido()">Finalizar Pedido</button>
+            </div>`;
+            container.innerHTML = html;
+        }
 
-function adicionarProduto() {
-  const nome = document.getElementById('produtoNome').value.trim();
-  const preco = parseFloat(document.getElementById('produtoPreco').value);
-  if (!nome || isNaN(preco) || preco < 0) {
-    showToast('Dados inválidos', 'error');
-    return;
-  }
-  const id = Date.now();
-  data.produtos.push({ id, nome, preco });
-  document.getElementById('produtoNome').value = '';
-  document.getElementById('produtoPreco').value = '';
-  saveToGitHub();
-  render();
-  showToast('Produto adicionado!', 'success');
-}
+        function renderCredito() {
+            const container = document.getElementById('creditoContent');
+            let html = `<div class="card">
+                <h2>Adicionar Crédito</h2>
+                <select id="creditoCliente">
+                    ${clientes.map(c => `<option value="${c.id}">${c.nome} (Saldo: R$ ${c.saldo.toFixed(2)})</option>`).join('')}
+                </select>
+                <input type="number" id="creditoValor" placeholder="Valor" step="0.01" min="0">
+                <button onclick="adicionarCredito()">Adicionar</button>
+            </div>`;
+            html += `<div class="card">
+                <h2>Clientes e Saldos</h2>
+                <div class="item-list">
+                    ${clientes.map(c => `<div class="item">
+                        <span>${c.nome}</span>
+                        <span class="${c.saldo < 0 ? 'negative' : ''}">R$ ${c.saldo.toFixed(2)}</span>
+                    </div>`).join('')}
+                </div>
+                <div style="margin-top:8px">
+                    <input type="text" id="novoClienteNome" placeholder="Nome do novo cliente">
+                    <button onclick="adicionarCliente()">Adicionar Cliente</button>
+                </div>
+            </div>`;
+            container.innerHTML = html;
+        }
 
-function removerProduto(id) {
-  data.produtos = data.produtos.filter(p => p.id !== id);
-  saveToGitHub();
-  render();
-}
+        function renderClientes() {
+            const container = document.getElementById('clientesContent');
+            let html = `<div class="card">
+                <h2>Gerenciar Clientes</h2>
+                <div class="item-list">
+                    ${clientes.map(c => `<div class="item">
+                        <span>${c.nome}</span>
+                        <span class="${c.saldo < 0 ? 'negative' : ''}">R$ ${c.saldo.toFixed(2)}</span>
+                    </div>`).join('')}
+                </div>
+                <input type="text" id="clienteNome" placeholder="Nome">
+                <button onclick="adicionarCliente()">Adicionar</button>
+            </div>`;
+            container.innerHTML = html;
+        }
 
-// Settings
-function saveSettings() {
-  token = document.getElementById('githubToken').value.trim();
-  repo = document.getElementById('githubRepo').value.trim();
-  filePath = document.getElementById('githubFilePath').value.trim() || 'data.json';
-  if (!token || !repo) {
-    showToast('Preencha token e repositório', 'error');
-    return;
-  }
-  closeModal('settingsModal');
-  fetchGitHub();
-  showToast('Configurações salvas!', 'success');
-}
+        function renderProdutos() {
+            const container = document.getElementById('produtosContent');
+            let html = `<div class="card">
+                <h2>Produtos</h2>
+                <div class="item-list">
+                    ${produtos.map(p => `<div class="item">
+                        <span>${p.nome}</span>
+                        <span>R$ ${p.preco.toFixed(2)}</span>
+                    </div>`).join('')}
+                </div>
+                <div>
+                    <input type="text" id="produtoNome" placeholder="Nome do produto">
+                    <input type="number" id="produtoPreco" placeholder="Preço" step="0.01" min="0">
+                    <button onclick="adicionarProduto()">Adicionar Produto</button>
+                </div>
+            </div>`;
+            container.innerHTML = html;
+        }
 
-// Init
-lucide.createIcons();
-render();
-</script>
+        function renderPedidos() {
+            const container = document.getElementById('pedidosContent');
+            if (pedidos.length === 0) {
+                container.innerHTML = '<div class="card"><p>Nenhum pedido realizado.</p></div>';
+                return;
+            }
+            let html = `<div class="card">
+                <h2>Histórico de Pedidos</h2>
+                ${pedidos.map(p => {
+                    const cliente = clientes.find(c => c.id === p.clienteId);
+                    const nomeCliente = cliente ? cliente.nome : 'Desconhecido';
+                    const itemsHtml = p.items.map(item => {
+                        const prod = produtos.find(pr => pr.id === item.produtoId);
+                        const nomeProd = prod ? prod.nome : 'Produto removido';
+                        return `${nomeProd} x${item.quantidade}`;
+                    }).join(', ');
+                    return `<div class="history-item">
+                        <strong>Pedido #${p.id}</strong> - ${nomeCliente}<br>
+                        <small>${new Date(p.data).toLocaleString('pt-BR')}</small><br>
+                        Items: ${itemsHtml}<br>
+                        Total: R$ ${p.total.toFixed(2)}
+                    </div>`;}).join('')}
+            </div>`;
+            container.innerHTML = html;
+        }
+
+        // ====== Actions ======
+        function adicionarAoCarrinho(produtoId) {
+            const existente = carrinho.find(item => item.produtoId === produtoId);
+            if (existente) {
+                existente.quantidade += 1;
+            } else {
+                carrinho.push({ produtoId, quantidade: 1 });
+            }
+            renderConsumo();
+            showToast('Item adicionado ao carrinho');
+        }
+
+        function removerDoCarrinho(produtoId) {
+            const index = carrinho.findIndex(item => item.produtoId === produtoId);
+            if (index !== -1) {
+                const item = carrinho[index];
+                if (item.quantidade > 1) {
+                    item.quantidade -= 1;
+                } else {
+                    carrinho.splice(index, 1);
+                }
+            }
+            renderConsumo();
+        }
+
+        function finalizarPedido() {
+            if (carrinho.length === 0) {
+                showToast('Carrinho vazio');
+                return;
+            }
+            const cliente = clientes.find(c => c.id === clienteSelecionado);
+            if (!cliente) return;
+            let total = 0;
+            const items = carrinho.map(item => {
+                const prod = produtos.find(p => p.id === item.produtoId);
+                if (prod) {
+                    total += prod.preco * item.quantidade;
+                    return { produtoId: item.produtoId, quantidade: item.quantidade };
+                }
+                return null;
+            }).filter(Boolean);
+            const pedido = {
+                id: pedidos.length + 1,
+                clienteId: cliente.id,
+                items,
+                total,
+                data: new Date().toISOString()
+            };
+            pedidos.push(pedido);
+            cliente.saldo -= total;
+            carrinho = [];
+            renderConsumo();
+            renderPedidos();
+            showToast('Pedido finalizado com sucesso!');
+        }
+
+        function adicionarCredito() {
+            const select = document.getElementById('creditoCliente');
+            const valorInput = document.getElementById('creditoValor');
+            const clienteId = parseInt(select.value);
+            const valor = parseFloat(valorInput.value);
+            if (isNaN(valor) || valor <= 0) {
+                showToast('Valor inválido');
+                return;
+            }
+            const cliente = clientes.find(c => c.id === clienteId);
+            if (cliente) {
+                cliente.saldo += valor;
+                renderCredito();
+                renderConsumo();
+                showToast('Crédito adicionado!');
+                valorInput.value = '';
+            }
+        }
+
+        function adicionarCliente() {
+            const nomeInput = document.getElementById('novoClienteNome') || document.getElementById('clienteNome');
+            const nome = nomeInput.value.trim();
+            if (!nome) {
+                showToast('Nome inválido');
+                return;
+            }
+            const novoId = clientes.length > 0 ? Math.max(...clientes.map(c => c.id)) + 1 : 1;
+            clientes.push({ id: novoId, nome, saldo: 0 });
+            nomeInput.value = '';
+            renderCredito();
+            renderClientes();
+            renderConsumo();
+            showToast('Cliente adicionado!');
+        }
+
+        function adicionarProduto() {
+            const nomeInput = document.getElementById('produtoNome');
+            const precoInput = document.getElementById('produtoPreco');
+            const nome = nomeInput.value.trim();
+            const preco = parseFloat(precoInput.value);
+            if (!nome || isNaN(preco) || preco <= 0) {
+                showToast('Dados inválidos');
+                return;
+            }
+            const novoId = produtos.length > 0 ? Math.max(...produtos.map(p => p.id)) + 1 : 1;
+            produtos.push({ id: novoId, nome, preco });
+            nomeInput.value = '';
+            precoInput.value = '';
+            renderProdutos();
+            renderConsumo();
+            showToast('Produto adicionado!');
+        }
+
+        // ====== Sync with GitHub (simulação) ======
+        async function syncWithGitHub() {
+            const btn = document.getElementById('syncBtn');
+            if (btn) btn.disabled = true;
+            // Simula busca de SHA
+            const sha = 'abc123';
+            showToast('SHA obtido: ' + sha);
+            // Simula salvamento
+            setTimeout(() => {
+                if (btn) btn.disabled = false;
+                showToast('Sincronizado com GitHub!');
+            }, 1500);
+        }
+
+        // ====== Tab Switching ======
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById(this.dataset.tab).classList.add('active');
+                // Render appropriate tab
+                switch(this.dataset.tab) {
+                    case 'tabConsumo': renderConsumo(); break;
+                    case 'tabCredito': renderCredito(); break;
+                    case 'tabClientes': renderClientes(); break;
+                    case 'tabProdutos': renderProdutos(); break;
+                    case 'tabPedidos': renderPedidos(); break;
+                }
+            });
+        });
+
+        // Sync button (added to consumo tab after render)
+        // We'll add it dynamically after first render
+        document.addEventListener('DOMContentLoaded', () => {
+            renderConsumo();
+            renderCredito();
+            renderClientes();
+            renderProdutos();
+            renderPedidos();
+            // Add sync button to consumo tab header
+            const consumoHeader = document.querySelector('#tabConsumo h1');
+            if (consumoHeader) {
+                const syncDiv = document.createElement('div');
+                syncDiv.className = 'sync-bar';
+                syncDiv.innerHTML = `<button id="syncBtn" onclick="syncWithGitHub()"><i class="fas fa-sync"></i> Sincronizar</button>`;
+                consumoHeader.parentNode.insertBefore(syncDiv, consumoHeader.nextSibling);
+            }
+        });
+    </script>
 </body>
 </html>
