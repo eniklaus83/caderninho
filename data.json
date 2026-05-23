@@ -19,6 +19,21 @@
       "id": "mpiw5y3ss8vr1",
       "name": "Aline Bueno",
       "balance": 10
+    },
+    {
+      "id": "mpiyrkodop4xd",
+      "name": "Pastor Junior",
+      "balance": 100
+    },
+    {
+      "id": "mpiys47udqmjg",
+      "name": "Márcio Prampolim",
+      "balance": 50
+    },
+    {
+      "id": "mpiysft88ns6b",
+      "name": "Ricardo Froes",
+      "balance": 50
     }
   ],
   "products": [
@@ -60,7 +75,7 @@
     {
       "id": "prod_suco_008",
       "name": "Suco de Pêssego Caixinha 200ml",
-      "price": 3.5
+      "price": 4.5
     },
     {
       "id": "prod_salgado_009",
@@ -101,6 +116,11 @@
       "id": "prod_halls_016",
       "name": "Halls Menta Original",
       "price": 2
+    },
+    {
+      "id": "mpiysw3cm9ouq",
+      "name": "Pastel de Carne",
+      "price": 10
     }
   ],
   "orders": [
