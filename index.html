@@ -144,12 +144,14 @@
 
   <!-- JAVASCRIPT LOGIC ENGINE -->
   <script>
+    // Inicialização de variáveis globais
     var DATABASE = { clients: [], products: [] };
     var fileSha = null;
     var activeClientId = null;
     var activeTabId = 'consumption';
     var GITHUB_CONFIG = JSON.parse(localStorage.getItem('GH_CONFIG')) || { user: '', repo: '', token: '' };
 
+    // Atribuição de inputs das configurações de persistência
     document.getElementById('cfg-user').value = GITHUB_CONFIG.user;
     document.getElementById('cfg-repo').value = GITHUB_CONFIG.repo;
     document.getElementById('cfg-token').value = GITHUB_CONFIG.token;
@@ -293,6 +295,7 @@
       if (activeTabId === 'products') renderProductsView();
     }
 
+    // --- RENDERING CORE CONTROLLERS ---
     function generateConsumptionRow(client) {
       var isZero = client.balance <= 0;
       var out = "";
@@ -331,6 +334,7 @@
       return out;
     }
 
+    // Retorna a linha do cliente com a sua respectiva função de remoção
     function generateClientRow(client) {
       var out = "";
       out += '<div class="bg-slate-900 p-3 rounded-xl flex justify-between items-center text-sm border border-slate-800">';
@@ -340,6 +344,7 @@
       return out;
     }
 
+    // Retorna a linha do produto com o preço formatado e botão de exclusão
     function generateProductRow(product) {
       var out = "";
       out += '<div class="bg-slate-900 p-3 rounded-xl flex justify-between items-center text-sm border border-slate-800">';
@@ -501,7 +506,10 @@
       }
     }
 
+    // Inicialização da biblioteca de ícones
     lucide.createIcons();
+
+    // Sincronização inicial com o GitHub ao carregar
     fetchFromGitHub();
   </script>
 </body>
