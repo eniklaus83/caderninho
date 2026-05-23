@@ -1,539 +1,521 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bar e Restaurante - Sistema</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0f172a;
-            color: #f1f5f9;
-            padding-bottom: 80px;
-        }
-        .app {
-            max-width: 480px;
-            margin: 0 auto;
-            padding: 16px;
-        }
-        h1, h2 {
-            font-size: 1.5rem;
-            margin-bottom: 12px;
-            color: #e2e8f0;
-        }
-        .card {
-            background: #1e293b;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        }
-        input, select, button {
-            width: 100%;
-            padding: 10px;
-            margin: 6px 0;
-            border-radius: 8px;
-            border: 1px solid #334155;
-            background: #0f172a;
-            color: #f1f5f9;
-            font-size: 1rem;
-        }
-        button {
-            background: #3b82f6;
-            color: white;
-            font-weight: bold;
-            border: none;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        button:hover {
-            background: #2563eb;
-        }
-        .tab-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #1e293b;
-            display: flex;
-            justify-content: space-around;
-            padding: 8px 0;
-            border-top: 1px solid #334155;
-            z-index: 100;
-        }
-        .tab-btn {
-            background: transparent;
-            color: #64748b;
-            font-size: 0.75rem;
-            border: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
-            padding: 4px 8px;
-            cursor: pointer;
-        }
-        .tab-btn.active {
-            color: #3b82f6;
-        }
-        .tab-btn i {
-            font-size: 1.3rem;
-        }
-        .tab-content {
-            display: none;
-        }
-        .tab-content.active {
-            display: block;
-        }
-        .item-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .item {
-            background: #0f172a;
-            border-radius: 8px;
-            padding: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .item-name {
-            font-weight: bold;
-        }
-        .item-price {
-            color: #94a3b8;
-        }
-        .badge {
-            background: #3b82f6;
-            border-radius: 50%;
-            padding: 2px 8px;
-            font-size: 0.75rem;
-        }
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #1e293b;
-            border: 1px solid #334155;
-            border-radius: 8px;
-            padding: 12px 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-            display: none;
-            z-index: 200;
-        }
-        .toast.show {
-            display: block;
-        }
-        .cart-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid #334155;
-        }
-        .cart-item button {
-            width: auto;
-            padding: 2px 8px;
-            background: #ef4444;
-            margin: 0;
-        }
-        .total {
-            font-size: 1.2rem;
-            font-weight: bold;
-            text-align: right;
-            margin-top: 12px;
-        }
-        .negative {
-            color: #ef4444;
-        }
-        .history-item {
-            background: #0f172a;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 8px;
-        }
-        .history-item small {
-            color: #94a3b8;
-        }
-        .sync-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        .sync-bar button {
-            width: auto;
-            padding: 6px 12px;
-            background: #22c55e;
-        }
-        .sync-bar button:disabled {
-            background: #475569;
-        }
-        @media (max-width: 480px) {
-            .app { padding: 12px; }
-        }
-    </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Caderninho Digital Pro</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icon Pack CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body { -webkit-tap-highlight-color: transparent; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
 </head>
-<body>
-    <div class="app">
-        <!-- Toast -->
-        <div id="toast" class="toast"></div>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-between antialiased pb-20 select-none">
 
-        <!-- Tabs Content -->
-        <div id="tabConsumo" class="tab-content active">
-            <h1>Consumo</h1>
-            <div id="consumoContent"></div>
+  <!-- GLOBAL HEADER -->
+  <header class="bg-slate-900 border-b border-slate-800 px-4 py-3.5 sticky top-0 z-40 shadow-md">
+    <div class="flex justify-between items-center max-w-md mx-auto">
+      <div class="flex items-center gap-2">
+        <div class="bg-amber-500/10 p-2 rounded-xl text-amber-500">
+          <i data-lucide="cloud-lightning" class="w-6 h-6"></i>
         </div>
-        <div id="tabCredito" class="tab-content">
-            <h1>Crédito</h1>
-            <div id="creditoContent"></div>
+        <div>
+          <h1 id="view-title" class="font-black text-base tracking-tight text-amber-500 uppercase">Apontar Consumo</h1>
+          <p id="cloud-status" class="text-[9px] text-rose-400 font-bold tracking-wide uppercase">Desconectado</p>
         </div>
-        <div id="tabClientes" class="tab-content">
-            <h1>Clientes</h1>
-            <div id="clientesContent"></div>
-        </div>
-        <div id="tabProdutos" class="tab-content">
-            <h1>Produtos</h1>
-            <div id="produtosContent"></div>
-        </div>
-        <div id="tabPedidos" class="tab-content">
-            <h1>Pedidos</h1>
-            <div id="pedidosContent"></div>
-        </div>
+      </div>
+      <button onclick="switchTab('config', 'Configurar Conexão', this)" class="bg-slate-800 text-slate-400 p-2.5 rounded-xl border border-slate-700/60 active:scale-90 transition-all">
+        <i data-lucide="settings" class="w-5 h-5"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- CONTENT DISPLAY ROUTER -->
+  <main class="flex-1 max-w-md w-full mx-auto px-4 py-4 overflow-y-auto">
+    <!-- TAB 1: CONSUMPTION DEBITS -->
+    <div id="view-consumption" class="space-y-3 view-tab">
+      <input id="search-consumption-client" type="text" oninput="renderConsumptionView()" placeholder="🔎 Buscar cliente pelo nome..." class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500">
+      <div id="consumption-list" class="space-y-2"></div>
     </div>
 
-    <!-- Tab Bar -->
-    <div class="tab-bar">
-        <button class="tab-btn active" data-tab="tabConsumo"><i class="fas fa-utensils"></i><span>Consumo</span></button>
-        <button class="tab-btn" data-tab="tabCredito"><i class="fas fa-coins"></i><span>Crédito</span></button>
-        <button class="tab-btn" data-tab="tabClientes"><i class="fas fa-users"></i><span>Clientes</span></button>
-        <button class="tab-btn" data-tab="tabProdutos"><i class="fas fa-box"></i><span>Produtos</span></button>
-        <button class="tab-btn" data-tab="tabPedidos"><i class="fas fa-history"></i><span>Pedidos</span></button>
+    <!-- TAB 2: FINANCIAL CREDIT -->
+    <div id="view-credit" class="space-y-3 view-tab hidden">
+      <p class="text-xs text-slate-400 px-1">Selecione o cliente para adicionar saldo pago via Pix ou Dinheiro:</p>
+      <div id="credit-list" class="space-y-2"></div>
     </div>
 
-    <script>
-        // ====== State ======
-        let clientes = [
-            { id: 1, nome: 'João', saldo: 50 },
-            { id: 2, nome: 'Maria', saldo: -10 }
-        ];
-        let produtos = [
-            { id: 1, nome: 'Cerveja', preco: 8 },
-            { id: 2, nome: 'Refrigerante', preco: 5 },
-            { id: 3, nome: 'Porção de Batata', preco: 15 }
-        ];
-        let pedidos = [
-            { id: 1, clienteId: 1, items: [{ produtoId: 1, quantidade: 2 }], total: 16, data: new Date().toISOString() }
-        ];
-        let carrinho = [];
-        let clienteSelecionado = 1;
+    <!-- TAB 3: CLIENT DIRECTORY -->
+    <div id="view-clients" class="space-y-4 view-tab hidden">
+      <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-3 shadow-md">
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Cadastrar Novo Cliente</h3>
+        <input id="input-client-name" type="text" placeholder="Nome do Cliente (Ex: Marcos Oficina)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500">
+        <button onclick="addClient()" class="w-full bg-amber-500 text-slate-950 font-black py-3 rounded-xl flex items-center justify-center gap-2 text-sm shadow-md active:scale-95 transition-all">
+          <i data-lucide="user-plus" class="w-4 h-4"></i> CADASTRAR CLIENTE
+        </button>
+      </div>
+      <div class="border-t border-slate-800 my-2"></div>
+      <div id="clients-registry-list" class="space-y-2"></div>
+    </div>
 
-        // ====== Toast ======
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            toast.textContent = msg;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
-        }
+    <!-- TAB 4: PRODUCT CATALOG -->
+    <div id="view-products" class="space-y-4 view-tab hidden">
+      <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-3 shadow-md">
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Cadastrar Novo Produto</h3>
+        <input id="input-product-name" type="text" placeholder="Nome do Produto (Ex: 🥤 Coca Lata)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500">
+        <input id="input-product-price" type="number" step="0.01" placeholder="Preço de Venda R$" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500">
+        <button onclick="addProduct()" class="w-full bg-amber-500 text-slate-950 font-black py-3 rounded-xl flex items-center justify-center gap-2 text-sm shadow-md active:scale-95 transition-all">
+          <i data-lucide="plus" class="w-4 h-4"></i> CADASTRAR PRODUTO
+        </button>
+      </div>
+      <div class="border-t border-slate-800 my-2"></div>
+      <div id="products-registry-list" class="space-y-2 max-h-60 overflow-y-auto no-scrollbar"></div>
+    </div>
 
-        // ====== Rendering Functions (CORRECTED TEMPLATE LITERALS) ======
-        function renderConsumo() {
-            const container = document.getElementById('consumoContent');
-            const cliente = clientes.find(c => c.id === clienteSelecionado);
-            if (!cliente) return;
-            let html = `<div class="card">
-                <h2>Cliente: ${cliente.nome}</h2>
-                <p>Saldo: <span class="${cliente.saldo < 0 ? 'negative' : ''}">R$ ${cliente.saldo.toFixed(2)}</span></p>
-                <label for="clienteSelect">Selecionar Cliente:</label>
-                <select id="clienteSelect" onchange="clienteSelecionado = parseInt(this.value); renderConsumo();">
-                    ${clientes.map(c => `<option value="${c.id}" ${c.id === clienteSelecionado ? 'selected' : ''}>${c.nome}</option>`).join('')}
-                </select>
-            </div>`;
-            html += `<div class="card">
-                <h2>Produtos</h2>
-                <div class="item-list">
-                    ${produtos.map(p => `<div class="item">
-                        <div>
-                            <div class="item-name">${p.nome}</div>
-                            <div class="item-price">R$ ${p.preco.toFixed(2)}</div>
-                        </div>
-                        <button onclick="adicionarAoCarrinho(${p.id})">+</button>
-                    </div>`).join('')}
-                </div>
-            </div>`;
-            html += `<div class="card">
-                <h2>Carrinho</h2>
-                <div id="carrinhoItems">
-                    ${carrinho.length === 0 ? '<p>Carrinho vazio</p>' : carrinho.map(item => {
-                        const prod = produtos.find(p => p.id === item.produtoId);
-                        return `<div class="cart-item">
-                            <span>${prod.nome} x${item.quantidade}</span>
-                            <span>R$ ${(prod.preco * item.quantidade).toFixed(2)}</span>
-                            <button onclick="removerDoCarrinho(${item.produtoId})">x</button>
-                        </div>`;
-                    }).join('')}
-                </div>
-                <div class="total">Total: R$ ${carrinho.reduce((sum, item) => {
-                    const prod = produtos.find(p => p.id === item.produtoId);
-                    return sum + (prod ? prod.preco * item.quantidade : 0);
-                }, 0).toFixed(2)}</div>
-                <button onclick="finalizarPedido()">Finalizar Pedido</button>
-            </div>`;
-            container.innerHTML = html;
-        }
+    <!-- TAB 5: TECHNICAL DEBUGGER SETTINGS -->
+    <div id="view-config" class="space-y-4 view-tab hidden">
+      <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-3 shadow-md">
+        <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5"><i data-lucide="github" class="w-4 h-4"></i> Credenciais do Repositório</h3>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Usuário do GitHub</label>
+          <input id="cfg-user" type="text" placeholder="Ex: seu-usuario" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Nome do Repositório</label>
+          <input id="cfg-repo" type="text" placeholder="Ex: caderninho" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Token de Acesso (PAT Classic)</label>
+          <input id="cfg-token" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxx" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500 font-mono">
+        </div>
+        <button onclick="saveConfig()" class="w-full bg-emerald-600 text-white font-black py-3 rounded-xl flex items-center justify-center gap-2 text-sm shadow-md active:scale-95 transition-all">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i> SALVAR E SINCRONIZAR
+        </button>
+      </div>
+      <!-- TERMINAL LOGS FOR FAULT TRACING -->
+      <div class="bg-black border border-slate-800 rounded-2xl p-4 space-y-2">
+        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1"><i data-lucide="terminal" class="w-3.5 h-3.5"></i> Terminal de Depuração</h4>
+        <div id="terminal-debug" class="font-mono text-[11px] text-amber-400 h-28 overflow-y-auto space-y-1 bg-slate-950 p-2 rounded-lg border border-slate-900">
+          [SISTEMA]: Aguardando credenciais...
+        </div>
+      </div>
+    </div>
+  </main>
 
-        function renderCredito() {
-            const container = document.getElementById('creditoContent');
-            let html = `<div class="card">
-                <h2>Adicionar Crédito</h2>
-                <select id="creditoCliente">
-                    ${clientes.map(c => `<option value="${c.id}">${c.nome} (Saldo: R$ ${c.saldo.toFixed(2)})</option>`).join('')}
-                </select>
-                <input type="number" id="creditoValor" placeholder="Valor" step="0.01" min="0">
-                <button onclick="adicionarCredito()">Adicionar</button>
-            </div>`;
-            html += `<div class="card">
-                <h2>Clientes e Saldos</h2>
-                <div class="item-list">
-                    ${clientes.map(c => `<div class="item">
-                        <span>${c.nome}</span>
-                        <span class="${c.saldo < 0 ? 'negative' : ''}">R$ ${c.saldo.toFixed(2)}</span>
-                    </div>`).join('')}
-                </div>
-                <div style="margin-top:8px">
-                    <input type="text" id="novoClienteNome" placeholder="Nome do novo cliente">
-                    <button onclick="adicionarCliente()">Adicionar Cliente</button>
-                </div>
-            </div>`;
-            container.innerHTML = html;
-        }
+  <!-- CONSUMPTION MODAL DRAWER -->
+  <div id="modal-billing" class="fixed inset-0 bg-slate-950/90 backdrop-blur-sm z-50 flex items-end justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-2xl p-5 space-y-4 shadow-2xl max-h-[80vh] flex flex-col">
+      <div class="flex justify-between items-start">
+        <div>
+          <h3 id="billing-client-name" class="font-black text-slate-100 text-lg">Cliente</h3>
+          <p class="text-xs text-slate-400">Saldo Disponível: <span id="billing-client-balance" class="text-emerald-400 font-mono font-bold">R$ 0,00</span></p>
+        </div>
+        <button onclick="closeBillingModal()" class="text-slate-400 bg-slate-950 p-2 rounded-xl"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div id="billing-products-grid" class="flex-1 overflow-y-auto space-y-2 no-scrollbar pr-1"></div>
+    </div>
+  </div>
 
-        function renderClientes() {
-            const container = document.getElementById('clientesContent');
-            let html = `<div class="card">
-                <h2>Gerenciar Clientes</h2>
-                <div class="item-list">
-                    ${clientes.map(c => `<div class="item">
-                        <span>${c.nome}</span>
-                        <span class="${c.saldo < 0 ? 'negative' : ''}">R$ ${c.saldo.toFixed(2)}</span>
-                    </div>`).join('')}
-                </div>
-                <input type="text" id="clienteNome" placeholder="Nome">
-                <button onclick="adicionarCliente()">Adicionar</button>
-            </div>`;
-            container.innerHTML = html;
-        }
+  <!-- TOAST WARNING MESSAGE SYSTEM -->
+  <div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-rose-600 border border-rose-500 text-white font-extrabold px-6 py-3.5 rounded-xl shadow-2xl text-center text-xs tracking-wide opacity-0 transition-opacity duration-300 pointer-events-none z-50 uppercase">
+    ⚠️ Saldo Insuficiente para esta operação!
+  </div>
 
-        function renderProdutos() {
-            const container = document.getElementById('produtosContent');
-            let html = `<div class="card">
-                <h2>Produtos</h2>
-                <div class="item-list">
-                    ${produtos.map(p => `<div class="item">
-                        <span>${p.nome}</span>
-                        <span>R$ ${p.preco.toFixed(2)}</span>
-                    </div>`).join('')}
-                </div>
-                <div>
-                    <input type="text" id="produtoNome" placeholder="Nome do produto">
-                    <input type="number" id="produtoPreco" placeholder="Preço" step="0.01" min="0">
-                    <button onclick="adicionarProduto()">Adicionar Produto</button>
-                </div>
-            </div>`;
-            container.innerHTML = html;
-        }
+  <!-- TAB NAVIGATION BAR -->
+  <nav class="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 py-2 px-3 z-40 shadow-2xl">
+    <div class="max-w-md mx-auto grid grid-cols-4 gap-1.5">
+      <button id="tab-btn-consumption" onclick="switchTab('consumption', 'Apontar Consumo', this)" class="nav-tab-btn flex flex-col items-center gap-1 py-2 rounded-xl text-amber-500 bg-amber-500/10 font-bold">
+        <i data-lucide="utensils-crossed" class="w-5 h-5"></i><span class="text-[10px]">Consumo</span>
+      </button>
+      <button onclick="switchTab('credit', 'Adicionar Crédito', this)" class="nav-tab-btn flex flex-col items-center gap-1 py-2 rounded-xl text-slate-400 hover:text-slate-200">
+        <i data-lucide="circle-dollar-sign" class="w-5 h-5"></i><span class="text-[10px]">+ Crédito</span>
+      </button>
+      <button onclick="switchTab('clients', 'Gerenciar Clientes', this)" class="nav-tab-btn flex flex-col items-center gap-1 py-2 rounded-xl text-slate-400 hover:text-slate-200">
+        <i data-lucide="users" class="w-5 h-5"></i><span class="text-[10px]">Clientes</span>
+      </button>
+      <button onclick="switchTab('products', 'Gerenciar Produtos', this)" class="nav-tab-btn flex flex-col items-center gap-1 py-2 rounded-xl text-slate-400 hover:text-slate-200">
+        <i data-lucide="package" class="w-5 h-5"></i><span class="text-[10px]">Produtos</span>
+      </button>
+    </div>
+  </nav>
 
-        function renderPedidos() {
-            const container = document.getElementById('pedidosContent');
-            if (pedidos.length === 0) {
-                container.innerHTML = '<div class="card"><p>Nenhum pedido realizado.</p></div>';
-                return;
-            }
-            let html = `<div class="card">
-                <h2>Histórico de Pedidos</h2>
-                ${pedidos.map(p => {
-                    const cliente = clientes.find(c => c.id === p.clienteId);
-                    const nomeCliente = cliente ? cliente.nome : 'Desconhecido';
-                    const itemsHtml = p.items.map(item => {
-                        const prod = produtos.find(pr => pr.id === item.produtoId);
-                        const nomeProd = prod ? prod.nome : 'Produto removido';
-                        return `${nomeProd} x${item.quantidade}`;
-                    }).join(', ');
-                    return `<div class="history-item">
-                        <strong>Pedido #${p.id}</strong> - ${nomeCliente}<br>
-                        <small>${new Date(p.data).toLocaleString('pt-BR')}</small><br>
-                        Items: ${itemsHtml}<br>
-                        Total: R$ ${p.total.toFixed(2)}
-                    </div>`;}).join('')}
-            </div>`;
-            container.innerHTML = html;
-        }
+  <!-- JAVASCRIPT LOGIC ENGINE -->
+  <script>
+    // Inicialização de variáveis globais
+    var DATABASE = { clients: [], products: [] };
+    var fileSha = null;
+    var activeClientId = null;
+    var activeTabId = 'consumption';
+    var GITHUB_CONFIG = JSON.parse(localStorage.getItem('GH_CONFIG')) || { user: '', repo: '', token: '' };
 
-        // ====== Actions ======
-        function adicionarAoCarrinho(produtoId) {
-            const existente = carrinho.find(item => item.produtoId === produtoId);
-            if (existente) {
-                existente.quantidade += 1;
-            } else {
-                carrinho.push({ produtoId, quantidade: 1 });
-            }
-            renderConsumo();
-            showToast('Item adicionado ao carrinho');
-        }
+    // Atribuição de inputs das configurações de persistência
+    document.getElementById('cfg-user').value = GITHUB_CONFIG.user;
+    document.getElementById('cfg-repo').value = GITHUB_CONFIG.repo;
+    document.getElementById('cfg-token').value = GITHUB_CONFIG.token;
 
-        function removerDoCarrinho(produtoId) {
-            const index = carrinho.findIndex(item => item.produtoId === produtoId);
-            if (index !== -1) {
-                const item = carrinho[index];
-                if (item.quantidade > 1) {
-                    item.quantidade -= 1;
-                } else {
-                    carrinho.splice(index, 1);
-                }
-            }
-            renderConsumo();
-        }
+    function logDebug(msg) {
+      var el = document.getElementById('terminal-debug');
+      if (el) {
+        el.innerHTML += "<div>[" + new Date().toLocaleTimeString() + "]: " + msg + "</div>";
+        el.scrollTop = el.scrollHeight;
+      }
+    }
 
-        function finalizarPedido() {
-            if (carrinho.length === 0) {
-                showToast('Carrinho vazio');
-                return;
-            }
-            const cliente = clientes.find(c => c.id === clienteSelecionado);
-            if (!cliente) return;
-            let total = 0;
-            const items = carrinho.map(item => {
-                const prod = produtos.find(p => p.id === item.produtoId);
-                if (prod) {
-                    total += prod.preco * item.quantidade;
-                    return { produtoId: item.produtoId, quantidade: item.quantidade };
-                }
-                return null;
-            }).filter(Boolean);
-            const pedido = {
-                id: pedidos.length + 1,
-                clienteId: cliente.id,
-                items,
-                total,
-                data: new Date().toISOString()
-            };
-            pedidos.push(pedido);
-            cliente.saldo -= total;
-            carrinho = [];
-            renderConsumo();
-            renderPedidos();
-            showToast('Pedido finalizado com sucesso!');
-        }
+    function utf8_to_b64(str) {
+      return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+        return String.fromCharCode(parseInt(p1, 16));
+      }));
+    }
 
-        function adicionarCredito() {
-            const select = document.getElementById('creditoCliente');
-            const valorInput = document.getElementById('creditoValor');
-            const clienteId = parseInt(select.value);
-            const valor = parseFloat(valorInput.value);
-            if (isNaN(valor) || valor <= 0) {
-                showToast('Valor inválido');
-                return;
-            }
-            const cliente = clientes.find(c => c.id === clienteId);
-            if (cliente) {
-                cliente.saldo += valor;
-                renderCredito();
-                renderConsumo();
-                showToast('Crédito adicionado!');
-                valorInput.value = '';
-            }
-        }
+    function b64_to_utf8(str) {
+      var cleanStr = str.replace(/\s/g, '');
+      return decodeURIComponent(atob(cleanStr).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+    }
 
-        function adicionarCliente() {
-            const nomeInput = document.getElementById('novoClienteNome') || document.getElementById('clienteNome');
-            const nome = nomeInput.value.trim();
-            if (!nome) {
-                showToast('Nome inválido');
-                return;
-            }
-            const novoId = clientes.length > 0 ? Math.max(...clientes.map(c => c.id)) + 1 : 1;
-            clientes.push({ id: novoId, nome, saldo: 0 });
-            nomeInput.value = '';
-            renderCredito();
-            renderClientes();
-            renderConsumo();
-            showToast('Cliente adicionado!');
-        }
+    function saveConfig() {
+      GITHUB_CONFIG.user = document.getElementById('cfg-user').value.trim();
+      GITHUB_CONFIG.repo = document.getElementById('cfg-repo').value.trim();
+      GITHUB_CONFIG.token = document.getElementById('cfg-token').value.trim();
+      localStorage.setItem('GH_CONFIG', JSON.stringify(GITHUB_CONFIG));
+      logDebug("Configurações salvas locais. Tentando parear...");
+      fetchFromGitHub();
+    }
 
-        function adicionarProduto() {
-            const nomeInput = document.getElementById('produtoNome');
-            const precoInput = document.getElementById('produtoPreco');
-            const nome = nomeInput.value.trim();
-            const preco = parseFloat(precoInput.value);
-            if (!nome || isNaN(preco) || preco <= 0) {
-                showToast('Dados inválidos');
-                return;
-            }
-            const novoId = produtos.length > 0 ? Math.max(...produtos.map(p => p.id)) + 1 : 1;
-            produtos.push({ id: novoId, nome, preco });
-            nomeInput.value = '';
-            precoInput.value = '';
-            renderProdutos();
-            renderConsumo();
-            showToast('Produto adicionado!');
-        }
+    async function fetchFromGitHub() {
+  if (!GITHUB_CONFIG.token || !GITHUB_CONFIG.user || !GITHUB_CONFIG.repo) {
+    logDebug("Aviso: Faltam parâmetros de credenciais Git.");
+    return;
+  }
+  var statusEl = document.getElementById('cloud-status');
+  statusEl.innerText = "🔌 SINCRONIZANDO...";
+  statusEl.className = "text-[9px] text-amber-400 font-bold tracking-wide uppercase";
+  
+  var url = "https://github.com" + GITHUB_CONFIG.user + "/" + GITHUB_CONFIG.repo + "/contents/dados.json";
 
-        // ====== Sync with GitHub (simulação) ======
-        async function syncWithGitHub() {
-            const btn = document.getElementById('syncBtn');
-            if (btn) btn.disabled = true;
-            // Simula busca de SHA
-            const sha = 'abc123';
-            showToast('SHA obtido: ' + sha);
-            // Simula salvamento
-            setTimeout(() => {
-                if (btn) btn.disabled = false;
-                showToast('Sincronizado com GitHub!');
-            }, 1500);
-        }
+  try {
+    var response = await fetch(url, {
+      method: 'GET',
+      mode: 'cors', // FORCES THE BROWSER PROTOCOL ENGINE TO HANDLE CORS HANDSHAKES
+      headers: { 
+        'Authorization': "token " + GITHUB_CONFIG.token, 
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (response.ok) {
+      var data = await response.json();
+      fileSha = data.sha;
+      DATABASE = JSON.parse(b64_to_utf8(data.content));
+      statusEl.innerText = "☁️ BANCO CONECTADO";
+      statusEl.className = "text-[9px] text-emerald-400 font-bold tracking-wide uppercase";
+      logDebug("Sucesso: Dados em Nuvem sincronizados!");
+      refreshActiveView();
+    } else {
+      var errRes = await response.json();
+      logDebug("Erro Git " + response.status + ": " + errRes.message);
+      statusEl.innerText = "⚠️ ERRO DE LOGIN";
+      statusEl.className = "text-[9px] text-rose-500 font-bold tracking-wide uppercase";
+    }
+  } catch (err) {
+    logDebug("Falha: Erro de rede ou CORS.");
+    statusEl.innerText = "⚠️ SEM INTERNET";
+    statusEl.className = "text-[9px] text-rose-500 font-bold tracking-wide uppercase";
+  }
+}
 
-        // ====== Tab Switching ======
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-                document.getElementById(this.dataset.tab).classList.add('active');
-                // Render appropriate tab
-                switch(this.dataset.tab) {
-                    case 'tabConsumo': renderConsumo(); break;
-                    case 'tabCredito': renderCredito(); break;
-                    case 'tabClientes': renderClientes(); break;
-                    case 'tabProdutos': renderProdutos(); break;
-                    case 'tabPedidos': renderPedidos(); break;
-                }
-            });
+
+
+    async function pushToGitHub() {
+      if (!GITHUB_CONFIG.token) return;
+      var statusEl = document.getElementById('cloud-status');
+      statusEl.innerText = "⏳ GRAVANDO...";
+      statusEl.className = "text-[9px] text-amber-400 font-bold tracking-wide uppercase";
+      
+      var url = "https://api.github.com/repos/" + GITHUB_CONFIG.user + "/" + GITHUB_CONFIG.repo + "/contents/dados.json";
+      var jsonString = JSON.stringify(DATABASE, null, 2);
+      var base64Content = utf8_to_b64(jsonString);
+      var body = {
+        message: "📱 Transação realizada via Mobile Client Dashboard",
+        content: base64Content,
+        sha: fileSha
+      };
+      
+      try {
+        var response = await fetch(url, {
+          method: 'PUT',
+          headers: {
+            'Authorization': "Bearer " + GITHUB_CONFIG.token,
+            'Accept': 'application/vnd.github+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(body)
         });
+        if (response.ok) {
+          var data = await response.json();
+          fileSha = data.content.sha;
+          statusEl.innerText = "☁️ BANCO CONECTADO";
+          statusEl.className = "text-[9px] text-emerald-400 font-bold tracking-wide uppercase";
+          logDebug("Sucesso: Transação salva na nuvem!");
+        } else {
+          var errRes = await response.json();
+          logDebug("Erro de Escrita " + response.status + ": " + errRes.message);
+          if(response.status === 409) { 
+            logDebug("Conflito de SHA! Forçando re-sincronização..."); 
+            fetchFromGitHub(); 
+          }
+        }
+      } catch (err) {
+        logDebug("Falha: Não foi possível enviar transação.");
+      }
+    }
 
-        // Sync button (added to consumo tab after render)
-        // We'll add it dynamically after first render
-        document.addEventListener('DOMContentLoaded', () => {
-            renderConsumo();
-            renderCredito();
-            renderClientes();
-            renderProdutos();
-            renderPedidos();
-            // Add sync button to consumo tab header
-            const consumoHeader = document.querySelector('#tabConsumo h1');
-            if (consumoHeader) {
-                const syncDiv = document.createElement('div');
-                syncDiv.className = 'sync-bar';
-                syncDiv.innerHTML = `<button id="syncBtn" onclick="syncWithGitHub()"><i class="fas fa-sync"></i> Sincronizar</button>`;
-                consumoHeader.parentNode.insertBefore(syncDiv, consumoHeader.nextSibling);
-            }
-        });
-    </script>
+    function switchTab(tabId, title, btnElement) {
+      activeTabId = tabId;
+      document.querySelectorAll('.view-tab').forEach(function(el) { 
+        el.classList.add('hidden'); 
+      });
+      document.getElementById("view-" + tabId).classList.remove('hidden');
+      document.getElementById('view-title').innerText = title;
+      
+      document.querySelectorAll('.nav-tab-btn').forEach(function(btn) {
+        btn.className = "nav-tab-btn flex flex-col items-center gap-1 py-2 rounded-xl text-slate-400 hover:text-slate-200 transition-all";
+      });
+      
+      if(btnElement && btnElement.classList.contains('nav-tab-btn')) {
+        btnElement.className = "nav-tab-btn flex flex-col items-center gap-1 py-2 rounded-xl text-amber-500 bg-amber-500/10 font-bold transition-all";
+      }
+      refreshActiveView();
+    }
+
+    function refreshActiveView() {
+      if (activeTabId === 'consumption') renderConsumptionView();
+      if (activeTabId === 'credit') renderCreditView();
+      if (activeTabId === 'clients') renderClientsView();
+      if (activeTabId === 'products') renderProductsView();
+    }
+
+    // --- RENDERING CORE CONTROLLERS ---
+    function generateConsumptionRow(client) {
+      var isZero = client.balance <= 0;
+      var out = "";
+      out += '<div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex justify-between items-center shadow-sm">';
+      out += '  <div onclick="' + (isZero ? '' : 'openBillingModal(\'' + client.id + '\')') + '" class="flex-1 cursor-pointer">';
+      out += '    <h4 class="font-extrabold text-sm ' + (isZero ? 'text-slate-500 line-through' : 'text-slate-100') + '">' + client.name + '</h4>';
+      out += '    <p class="text-xs font-mono font-black mt-1 ' + (isZero ? 'text-rose-500 bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded w-max text-[10px]' : 'text-emerald-400') + '">';
+      out += isZero ? 'SALDO ZERADO' : 'Disponível: R$ ' + client.balance.toFixed(2).replace('.', ',');
+      out += '    </p>';
+      out += '  </div>';
+      if (!isZero) {
+        out += '  <button onclick="openBillingModal(\'' + client.id + '\')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs px-4 py-3 rounded-xl flex items-center gap-1 transition-all"><i data-lucide="utensils-crossed" class="w-3.5 h-3.5"></i> DEBITAR</button>';
+      }
+      out += '</div>';
+      return out;
+    }
+
+    function generateBillingButton(product) {
+      var out = "";
+      out += '<button onclick="executeDebit(' + product.price + ', \'' + product.name + '\')" class="w-full bg-slate-950 border border-slate-800 hover:border-amber-500 p-4 rounded-xl flex justify-between items-center text-left transition-colors">';
+      out += '  <span class="font-extrabold text-slate-200 text-xs">' + product.name + '</span>';
+      out += '  <span class="text-amber-400 font-mono font-black text-xs">R$ ' + product.price.toFixed(2).replace('.', ',') + '</span>';
+      out += '</button>';
+      return out;
+    }
+
+    function generateCreditRow(client) {
+      var out = "";
+      out += '<div onclick="triggerAddCreditFlow(\'' + client.id + '\')" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex justify-between items-center cursor-pointer hover:border-slate-700 transition-all">';
+      out += '  <div>';
+      out += '    <h4 class="font-bold text-slate-200 text-sm">' + client.name + '</h4>';
+      out += '    <p class="text-xs font-mono text-slate-400">Saldo: R$ ' + client.balance.toFixed(2).replace('.', ',') + '</p>';
+      out += '  </div>';
+      out += '  <button class="bg-emerald-600 text-white font-black text-xs px-4 py-3 rounded-xl flex items-center gap-1"><i data-lucide="plus" class="w-3.5 h-3.5"></i> ADICIONAR</button>';
+      out += '</div>';
+      return out;
+    }
+
+    // Retorna a linha do cliente com a sua respectiva função de remoção
+    function generateClientRow(client) {
+      var out = "";
+      out += '<div class="bg-slate-900 p-3 rounded-xl flex justify-between items-center text-sm border border-slate-800">';
+      out += '  <span class="font-bold text-slate-300">' + client.name + '</span>';
+      out += '  <button onclick="deleteClient(\'' + client.id + '\')" class="text-rose-400 p-1 hover:bg-rose-500/10 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4"></i></button>';
+      out += '</div>';
+      return out;
+    }
+
+    // Retorna a linha do produto com o preço formatado e botão de exclusão
+    function generateProductRow(product) {
+      var out = "";
+      out += '<div class="bg-slate-900 p-3 rounded-xl flex justify-between items-center text-sm border border-slate-800">';
+      out += '  <span class="font-medium text-slate-300">' + product.name + '</span>';
+      out += '  <div class="flex items-center gap-3">';
+      out += '    <span class="text-amber-400 font-mono font-bold">R$ ' + product.price.toFixed(2).replace('.', ',') + '</span>';
+      out += '    <button onclick="deleteProduct(\'' + product.id + '\')" class="text-rose-400 p-1 hover:bg-rose-500/10 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4"></i></button>';
+      out += '  </div>';
+      out += '</div>';
+      return out;
+    }
+
+    function renderConsumptionView() {
+      var query = document.getElementById('search-consumption-client').value.toLowerCase();
+      var container = document.getElementById('consumption-list');
+      var filtered = DATABASE.clients.filter(function(c) { return c.name.toLowerCase().includes(query); });
+      if(filtered.length === 0) { 
+        container.innerHTML = '<p class="text-xs text-slate-600 text-center py-6">Nenhum cliente ativo.</p>'; 
+        return; 
+      }
+      var html = "";
+      for(var i = 0; i < filtered.length; i++) {
+        html += generateConsumptionRow(filtered[i]);
+      }
+      container.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    function openBillingModal(id) {
+      activeClientId = id;
+      var client = DATABASE.clients.find(function(c) { return c.id == id; });
+      document.getElementById('billing-client-name').innerText = client.name;
+      document.getElementById('billing-client-balance').innerText = "R$ " + client.balance.toFixed(2).replace('.', ',');
+      var container = document.getElementById('billing-products-grid');
+      if(DATABASE.products.length === 0){
+        container.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">Nenhum produto cadastrado.</p>';
+      } else {
+        var html = "";
+        for(var i = 0; i < DATABASE.products.length; i++) {
+          html += generateBillingButton(DATABASE.products[i]);
+        }
+        container.innerHTML = html;
+      }
+      document.getElementById('modal-billing').classList.remove('hidden');
+    }
+
+    function closeBillingModal() { 
+      document.getElementById('modal-billing').classList.add('hidden'); 
+      activeClientId = null; 
+    }
+
+    function executeDebit(price, name) {
+      var client = DATABASE.clients.find(function(c) { return c.id == activeClientId; });
+      if (client.balance >= price) {
+        client.balance -= price;
+        document.getElementById('billing-client-balance').innerText = "R$ " + client.balance.toFixed(2).replace('.', ',');
+        renderConsumptionView();
+        pushToGitHub();
+        if (client.balance <= 0) closeBillingModal();
+      } else {
+        triggerToast();
+      }
+    }
+
+    function renderCreditView() {
+      var container = document.getElementById('credit-list');
+      if(DATABASE.clients.length === 0) { 
+        container.innerHTML = '<p class="text-xs text-slate-600 text-center py-6">Nenhum cliente cadastrado.</p>'; 
+        return; 
+      }
+      var html = "";
+      for(var i = 0; i < DATABASE.clients.length; i++) {
+        html += generateCreditRow(DATABASE.clients[i]);
+      }
+      container.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    function triggerAddCreditFlow(id) {
+      var client = DATABASE.clients.find(function(c) { return c.id == id; });
+      var value = parseFloat(prompt("Quanto de crédito R$ para colocar na conta de: " + client.name + "?"));
+      if (isNaN(value) || value <= 0) return;
+      client.balance += value;
+      renderCreditView();
+      pushToGitHub();
+    }
+
+    function addClient() {
+      var input = document.getElementById('input-client-name');
+      var val = input.value.trim();
+      if (!val) return;
+      DATABASE.clients.push({ id: Date.now().toString(), name: val, balance: 0.00 });
+      input.value = '';
+      renderClientsView();
+      pushToGitHub();
+    }
+
+    function renderClientsView() {
+      var container = document.getElementById('clients-registry-list');
+      if(DATABASE.clients.length === 0) { 
+        container.innerHTML = '<p class="text-xs text-slate-600 text-center py-6">Nenhum cliente cadastrado.</p>'; 
+        return; 
+      }
+      var html = "";
+      for(var i = 0; i < DATABASE.clients.length; i++) {
+        html += generateClientRow(DATABASE.clients[i]);
+      }
+      container.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    function deleteClient(id) {
+      if(confirm("Remover este cliente permanentemente?")) {
+        DATABASE.clients = DATABASE.clients.filter(function(c) { return c.id != id; });
+        renderClientsView();
+        pushToGitHub();
+      }
+    }
+
+    function addProduct() {
+      var nameInput = document.getElementById('input-product-name');
+      var priceInput = document.getElementById('input-product-price');
+      var price = parseFloat(priceInput.value);
+      var name = nameInput.value.trim();
+      if (!name || isNaN(price)) return;
+      DATABASE.products.push({ id: Date.now().toString(), name: name, price: price });
+      nameInput.value = ''; priceInput.value = '';
+      renderProductsView();
+      pushToGitHub();
+    }
+
+    function renderProductsView() {
+      var container = document.getElementById('products-registry-list');
+      if(DATABASE.products.length === 0) { 
+        container.innerHTML = '<p class="text-xs text-slate-600 text-center py-6">Nenhum produto cadastrado.</p>'; 
+        return; 
+      }
+      var html = "";
+      for(var i = 0; i < DATABASE.products.length; i++) {
+        html += generateProductRow(DATABASE.products[i]);
+      }
+      container.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    function deleteProduct(id) {
+      if(confirm("Excluir este produto do catálogo?")) {
+        DATABASE.products = DATABASE.products.filter(function(p) { return p.id != id; });
+        renderProductsView();
+        pushToGitHub();
+      }
+    }
+
+    function triggerToast() {
+      var toast = document.getElementById('toast');
+      if (toast) {
+        toast.style.opacity = "1";
+        setTimeout(function() { toast.style.opacity = "0"; }, 2500);
+      }
+    }
+
+    // Inicialização da biblioteca de ícones
+    lucide.createIcons();
+
+    // Sincronização inicial com o GitHub ao carregar
+    fetchFromGitHub();
+  </script>
 </body>
 </html>
