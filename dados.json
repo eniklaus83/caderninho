@@ -1,0 +1,81 @@
+{
+  "clients": [
+    {
+      "id": "1716490001000",
+      "name": "Seu Jorge (Mecânica da Esquina)",
+      "balance": 85.50
+    },
+    {
+      "id": "1716490002000",
+      "name": "Dona Maria da Costura",
+      "balance": 14.00
+    },
+    {
+      "id": "1716490003000",
+      "name": "Carlinhos do Espetinho",
+      "balance": 120.00
+    },
+    {
+      "id": "1716490004000",
+      "name": "Aline (Salão de Beleza)",
+      "balance": 0.00
+    }
+  ],
+  "products": [
+    {
+      "id": "1",
+      "name": "🥤 Refrigerante Coca-Cola Lata",
+      "price": 7.00
+    },
+    {
+      "id": "2",
+      "name": "🥤 Refrigerante Guaraná Antarctica Lata",
+      "price": 6.00
+    },
+    {
+      "id": "3",
+      "name": "💧 Água Mineral Sem Gás",
+      "price": 4.00
+    },
+    {
+      "id": "4",
+      "name": "🥟 Salgado: Coxinha de Frango com Catupiry",
+      "price": 9.50
+    },
+    {
+      "id": "5",
+      "name": "🥟 Salgado: Enroladinho de Presunto e Queijo",
+      "price": 9.00
+    },
+    {
+      "id": "6",
+      "name": "🥟 Salgado: Pastel Assado de Carne",
+      "price": 10.00
+    },
+    {
+      "id": "7",
+      "name": "🍫 Chocolate: Barra Lacta / Nestlé",
+      "price": 6.50
+    },
+    {
+      "id": "8",
+      "name": "🍫 Chocolate: Bombom Sonho de Valsa",
+      "price": 1.50
+    },
+    {
+      "id": "9",
+      "name": "🍬 Balas: Pacotinho de Trident",
+      "price": 3.00
+    },
+    {
+      "id": "10",
+      "name": "🍮 Doce: Brigadeiro Caseiro Grande",
+      "price": 4.50
+    },
+    {
+      "id": "11",
+      "name": "🍮 Doce: Paçoca Rolha Unitária",
+      "price": 1.00
+    }
+  ]
+}
