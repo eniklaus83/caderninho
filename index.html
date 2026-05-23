@@ -187,46 +187,48 @@
     }
 
     async function fetchFromGitHub() {
-      if (!GITHUB_CONFIG.token || !GITHUB_CONFIG.user || !GITHUB_CONFIG.repo) {
-        logDebug("Aviso: Faltam parâmetros de credenciais Git.");
-        return;
-      }
-      var statusEl = document.getElementById('cloud-status');
-      statusEl.innerText = "🔌 SINCRONIZANDO...";
-      statusEl.className = "text-[9px] text-amber-400 font-bold tracking-wide uppercase";
-      
-      // CORRIGIDO: URL alterada para api.github.com e adicionado as barras de separação corretas
-      var url = "https://github.com" + GITHUB_CONFIG.user + "/" + GITHUB_CONFIG.repo + "/contents/dados.json";
+  if (!GITHUB_CONFIG.token || !GITHUB_CONFIG.user || !GITHUB_CONFIG.repo) {
+    logDebug("Aviso: Faltam parâmetros de credenciais Git.");
+    return;
+  }
+  var statusEl = document.getElementById('cloud-status');
+  statusEl.innerText = "🔌 SINCRONIZANDO...";
+  statusEl.className = "text-[9px] text-amber-400 font-bold tracking-wide uppercase";
+  
+  var url = "https://github.com" + GITHUB_CONFIG.user + "/" + GITHUB_CONFIG.repo + "/contents/dados.json";
 
-      try {
-        var response = await fetch(url, {
-          headers: { 
-            // Usar "token " ou "Bearer " com o cabeçalho Accept padrão do GitHub
-            'Authorization': "token " + GITHUB_CONFIG.token, 
-            'Accept': 'application/vnd.github.v3+json',
-            'Cache-Control': 'no-cache' 
-          }
-        });
-        if (response.ok) {
-          var data = await response.json();
-          fileSha = data.sha;
-          DATABASE = JSON.parse(b64_to_utf8(data.content));
-          statusEl.innerText = "☁️ BANCO CONECTADO";
-          statusEl.className = "text-[9px] text-emerald-400 font-bold tracking-wide uppercase";
-          logDebug("Sucesso: Dados em Nuvem sincronizados!");
-          refreshActiveView();
-        } else {
-          var errRes = await response.json();
-          logDebug("Erro Git " + response.status + ": " + errRes.message);
-          statusEl.innerText = "⚠️ ERRO DE LOGIN";
-          statusEl.className = "text-[9px] text-rose-500 font-bold tracking-wide uppercase";
-        }
-      } catch (err) {
-        logDebug("Falha: Erro de rede ou CORS.");
-        statusEl.innerText = "⚠️ SEM INTERNET";
-        statusEl.className = "text-[9px] text-rose-500 font-bold tracking-wide uppercase";
+  try {
+    var response = await fetch(url, {
+      method: 'GET',
+      mode: 'cors', // FORCES THE BROWSER PROTOCOL ENGINE TO HANDLE CORS HANDSHAKES
+      headers: { 
+        'Authorization': "token " + GITHUB_CONFIG.token, 
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
       }
+    });
+    
+    if (response.ok) {
+      var data = await response.json();
+      fileSha = data.sha;
+      DATABASE = JSON.parse(b64_to_utf8(data.content));
+      statusEl.innerText = "☁️ BANCO CONECTADO";
+      statusEl.className = "text-[9px] text-emerald-400 font-bold tracking-wide uppercase";
+      logDebug("Sucesso: Dados em Nuvem sincronizados!");
+      refreshActiveView();
+    } else {
+      var errRes = await response.json();
+      logDebug("Erro Git " + response.status + ": " + errRes.message);
+      statusEl.innerText = "⚠️ ERRO DE LOGIN";
+      statusEl.className = "text-[9px] text-rose-500 font-bold tracking-wide uppercase";
     }
+  } catch (err) {
+    logDebug("Falha: Erro de rede ou CORS.");
+    statusEl.innerText = "⚠️ SEM INTERNET";
+    statusEl.className = "text-[9px] text-rose-500 font-bold tracking-wide uppercase";
+  }
+}
+
 
 
     async function pushToGitHub() {
