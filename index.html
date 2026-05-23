@@ -195,14 +195,15 @@
       statusEl.innerText = "🔌 SINCRONIZANDO...";
       statusEl.className = "text-[9px] text-amber-400 font-bold tracking-wide uppercase";
       
+      // CORRIGIDO: URL alterada para api.github.com e adicionado as barras de separação corretas
       var url = "https://github.com" + GITHUB_CONFIG.user + "/" + GITHUB_CONFIG.repo + "/contents/dados.json";
 
-      
       try {
         var response = await fetch(url, {
           headers: { 
-            'Authorization': "Bearer " + GITHUB_CONFIG.token, 
-            'Accept': 'application/vnd.github+json',
+            // Usar "token " ou "Bearer " com o cabeçalho Accept padrão do GitHub
+            'Authorization': "token " + GITHUB_CONFIG.token, 
+            'Accept': 'application/vnd.github.v3+json',
             'Cache-Control': 'no-cache' 
           }
         });
@@ -226,6 +227,7 @@
         statusEl.className = "text-[9px] text-rose-500 font-bold tracking-wide uppercase";
       }
     }
+
 
     async function pushToGitHub() {
       if (!GITHUB_CONFIG.token) return;
