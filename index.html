@@ -144,14 +144,12 @@
 
   <!-- JAVASCRIPT LOGIC ENGINE -->
   <script>
-    // Inicialização de variáveis globais
     var DATABASE = { clients: [], products: [] };
     var fileSha = null;
     var activeClientId = null;
     var activeTabId = 'consumption';
     var GITHUB_CONFIG = JSON.parse(localStorage.getItem('GH_CONFIG')) || { user: '', repo: '', token: '' };
 
-    // Atribuição de inputs das configurações de persistência
     document.getElementById('cfg-user').value = GITHUB_CONFIG.user;
     document.getElementById('cfg-repo').value = GITHUB_CONFIG.repo;
     document.getElementById('cfg-token').value = GITHUB_CONFIG.token;
@@ -171,7 +169,6 @@
     }
 
     function b64_to_utf8(str) {
-      // Remove quebras de linha e espaços do Base64 vindo do GitHub
       var cleanStr = str.replace(/\s/g, '');
       return decodeURIComponent(atob(cleanStr).split('').map(function(c) {
         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
@@ -196,13 +193,13 @@
       statusEl.innerText = "🔌 SINCRONIZANDO...";
       statusEl.className = "text-[9px] text-amber-400 font-bold tracking-wide uppercase";
       
-      // Endpoint correto usando api.github.com/repos/
       var url = "https://api.github.com/repos/" + GITHUB_CONFIG.user + "/" + GITHUB_CONFIG.repo + "/contents/dados.json";
       
       try {
         var response = await fetch(url, {
           headers: { 
-            'Authorization': "token " + GITHUB_CONFIG.token, 
+            'Authorization': "Bearer " + GITHUB_CONFIG.token, 
+            'Accept': 'application/vnd.github+json',
             'Cache-Control': 'no-cache' 
           }
         });
@@ -246,7 +243,8 @@
         var response = await fetch(url, {
           method: 'PUT',
           headers: {
-            'Authorization': "token " + GITHUB_CONFIG.token,
+            'Authorization': "Bearer " + GITHUB_CONFIG.token,
+            'Accept': 'application/vnd.github+json',
             'Content-Type': 'application/json'
           },
           body: JSON.stringify(body)
@@ -295,7 +293,6 @@
       if (activeTabId === 'products') renderProductsView();
     }
 
-    // --- RENDERING CORE CONTROLLERS ---
     function generateConsumptionRow(client) {
       var isZero = client.balance <= 0;
       var out = "";
@@ -504,10 +501,7 @@
       }
     }
 
-    // Inicialização da biblioteca de ícones
     lucide.createIcons();
-
-    // Sincronização inicial com o GitHub ao carregar
     fetchFromGitHub();
   </script>
 </body>
