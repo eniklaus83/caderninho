@@ -23,19 +23,84 @@
   ],
   "products": [
     {
-      "id": "mpiw67kan5x3t",
-      "name": "Suco",
-      "price": 10
+      "id": "prod_refrigerante_001",
+      "name": "Coca-Cola Lata 350ml",
+      "price": 4.50
     },
     {
-      "id": "mpiw6dvs6gmeb",
-      "name": "Salgado",
-      "price": 10
+      "id": "prod_refrigerante_002",
+      "name": "Fanta Laranja Lata 350ml",
+      "price": 4.00
     },
     {
-      "id": "mpiw6jh9vctso",
-      "name": "Bala",
-      "price": 2
+      "id": "prod_refrigerante_003",
+      "name": "Fanta Uva Lata 350ml",
+      "price": 4.00
+    },
+    {
+      "id": "prod_refrigerante_004",
+      "name": "Fanta Guarana Lata 350ml",
+      "price": 4.00
+    },
+    {
+      "id": "prod_refrigerante_005",
+      "name": "Guaraná Antarctica Lata 350ml",
+      "price": 4.00
+    },
+    {
+      "id": "prod_suco_006",
+      "name": "Suco de Laranja Caixinha 200ml",
+      "price": 3.50
+    },
+    {
+      "id": "prod_suco_007",
+      "name": "Suco de Uva Caixinha 200ml",
+      "price": 3.50
+    },
+    {
+      "id": "prod_suco_008",
+      "name": "Suco de Pêssego Caixinha 200ml",
+      "price": 3.50
+    },
+    {
+      "id": "prod_salgado_009",
+      "name": "Coxinha de Frango",
+      "price": 5.00
+    },
+    {
+      "id": "prod_salgado_010",
+      "name": "Esfiha de Carne",
+      "price": 4.50
+    },
+    {
+      "id": "prod_salgado_011",
+      "name": "Pastel de Queijo",
+      "price": 4.50
+    },
+    {
+      "id": "prod_doce_012",
+      "name": "Fini Tubo de Morango",
+      "price": 2.50
+    },
+    {
+      "id": "prod_doce_013",
+      "name": "Chiclete Ping Pong Tutti-Frutti",
+      "price": 1.00
+    },
+    {
+      "id": "prod_chocolate_014",
+      "name": "Kit Kat Ao Leite 41g",
+      "price": 5.50
+    },
+    {
+      "id": "prod_chocolate_015",
+      "name": "Chocolate Lacta 90g",
+      "price": 6.00
+    },
+    {
+      "id": "prod_halls_016",
+      "name": "Halls Menta Original",
+      "price": 2.00
     }
   ],
   "orders": [
