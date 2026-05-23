@@ -1,523 +1,413 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Caderninho Digital Pro</title>
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icon Pack CDN -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistema de Crédito e Pedidos</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
   <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
-    body { -webkit-tap-highlight-color: transparent; }
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-  </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-between antialiased pb-20 select-none">
-
-  <!-- GLOBAL HEADER -->
-  <header class="bg-slate-900 border-b border-slate-800 px-4 py-3.5 sticky top-0 z-40 shadow-md">
-    <div class="flex justify-between items-center max-w-md mx-auto">
-      <div class="flex items-center gap-2">
-        <div class="bg-amber-500/10 p-2 rounded-xl text-amber-500">
-          <i data-lucide="cloud-lightning" class="w-6 h-6"></i>
-        </div>
-        <div>
-          <h1 id="view-title" class="font-black text-base tracking-tight text-amber-500 uppercase">Apontar Consumo</h1>
-          <p id="cloud-status" class="text-[9px] text-rose-400 font-bold tracking-wide uppercase">Desconectado</p>
-        </div>
-      </div>
-      <button onclick="switchTab('config', 'Configurar Conexão', this)" class="bg-slate-800 text-slate-400 p-2.5 rounded-xl border border-slate-700/60 active:scale-90 transition-all">
-        <i data-lucide="settings" class="w-5 h-5"></i>
-      </button>
-    </div>
-  </header>
-
-  <!-- CONTENT DISPLAY ROUTER -->
-  <main class="flex-1 max-w-md w-full mx-auto px-4 py-4 overflow-y-auto">
-    <!-- TAB 1: CONSUMPTION DEBITS -->
-    <div id="view-consumption" class="space-y-3 view-tab">
-      <input id="search-consumption-client" type="text" oninput="renderConsumptionView()" placeholder="🔎 Buscar cliente pelo nome..." class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500">
-      <div id="consumption-list" class="space-y-2"></div>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen p-6">
+  <div class="max-w-6xl mx-auto space-y-8">
+    <!-- Header -->
+    <div class="bg-white shadow-xl rounded-2xl p-6">
+      <h1 class="text-3xl font-bold text-gray-800">Sistema de Crédito e Pedidos</h1>
+      <p class="text-gray-500">Gerencie clientes, produtos, créditos e pedidos com GitHub</p>
     </div>
 
-    <!-- TAB 2: FINANCIAL CREDIT -->
-    <div id="view-credit" class="space-y-3 view-tab hidden">
-      <p class="text-xs text-slate-400 px-1">Selecione o cliente para adicionar saldo pago via Pix ou Dinheiro:</p>
-      <div id="credit-list" class="space-y-2"></div>
+    <!-- Toast -->
+    <div id="toast" class="fixed top-4 right-4 hidden bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-opacity duration-300"></div>
+
+    <!-- Seção Clientes -->
+    <div class="bg-white shadow-xl rounded-2xl p-6">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4"><i data-lucide="users" class="inline-block w-5 h-5 mr-2"></i>Clientes</h2>
+      <div class="flex gap-2 mb-4">
+        <input id="clientNameInput" type="text" placeholder="Nome do cliente" class="flex-1 p-2 border rounded-lg" />
+        <button onclick="addClient()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i>Adicionar</button>
+      </div>
+      <ul id="clientList" class="space-y-2"></ul>
     </div>
 
-    <!-- TAB 3: CLIENT DIRECTORY -->
-    <div id="view-clients" class="space-y-4 view-tab hidden">
-      <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-3 shadow-md">
-        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Cadastrar Novo Cliente</h3>
-        <input id="input-client-name" type="text" placeholder="Nome do Cliente (Ex: Marcos Oficina)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500">
-        <button onclick="addClient()" class="w-full bg-amber-500 text-slate-950 font-black py-3 rounded-xl flex items-center justify-center gap-2 text-sm shadow-md active:scale-95 transition-all">
-          <i data-lucide="user-plus" class="w-4 h-4"></i> CADASTRAR CLIENTE
-        </button>
+    <!-- Seção Produtos -->
+    <div class="bg-white shadow-xl rounded-2xl p-6">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4"><i data-lucide="package" class="inline-block w-5 h-5 mr-2"></i>Produtos</h2>
+      <div class="flex gap-2 mb-4">
+        <input id="productNameInput" type="text" placeholder="Nome do produto" class="flex-1 p-2 border rounded-lg" />
+        <input id="productPriceInput" type="number" placeholder="Preço" min="0" step="0.01" class="w-24 p-2 border rounded-lg" />
+        <button onclick="addProduct()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i>Adicionar</button>
       </div>
-      <div class="border-t border-slate-800 my-2"></div>
-      <div id="clients-registry-list" class="space-y-2"></div>
+      <ul id="productList" class="space-y-2"></ul>
     </div>
 
-    <!-- TAB 4: PRODUCT CATALOG -->
-    <div id="view-products" class="space-y-4 view-tab hidden">
-      <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-3 shadow-md">
-        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Cadastrar Novo Produto</h3>
-        <input id="input-product-name" type="text" placeholder="Nome do Produto (Ex: 🥤 Coca Lata)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500">
-        <input id="input-product-price" type="number" step="0.01" placeholder="Preço de Venda R$" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500">
-        <button onclick="addProduct()" class="w-full bg-amber-500 text-slate-950 font-black py-3 rounded-xl flex items-center justify-center gap-2 text-sm shadow-md active:scale-95 transition-all">
-          <i data-lucide="plus" class="w-4 h-4"></i> CADASTRAR PRODUTO
-        </button>
+    <!-- Seção Crédito -->
+    <div class="bg-white shadow-xl rounded-2xl p-6">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4"><i data-lucide="wallet" class="inline-block w-5 h-5 mr-2"></i>Crédito</h2>
+      <div class="flex gap-2 mb-4">
+        <select id="clientSelectCredit" class="flex-1 p-2 border rounded-lg"></select>
+        <input id="creditAmountInput" type="number" placeholder="Valor" step="0.01" class="w-24 p-2 border rounded-lg" />
+        <button onclick="addCredit()" class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition flex items-center gap-2"><i data-lucide="plus-circle" class="w-4 h-4"></i>Adicionar Crédito</button>
       </div>
-      <div class="border-t border-slate-800 my-2"></div>
-      <div id="products-registry-list" class="space-y-2 max-h-60 overflow-y-auto no-scrollbar"></div>
+      <ul id="creditList" class="space-y-2"></ul>
     </div>
 
-    <!-- TAB 5: TECHNICAL DEBUGGER SETTINGS -->
-    <div id="view-config" class="space-y-4 view-tab hidden">
-      <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-3 shadow-md">
-        <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5"><i data-lucide="github" class="w-4 h-4"></i> Credenciais do Repositório</h3>
-        <div>
-          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Usuário do GitHub</label>
-          <input id="cfg-user" type="text" placeholder="Ex: seu-usuario" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500">
-        </div>
-        <div>
-          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Nome do Repositório</label>
-          <input id="cfg-repo" type="text" placeholder="Ex: caderninho" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500">
-        </div>
-        <div>
-          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Token de Acesso (PAT Classic)</label>
-          <input id="cfg-token" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxx" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500 font-mono">
-        </div>
-        <button onclick="saveConfig()" class="w-full bg-emerald-600 text-white font-black py-3 rounded-xl flex items-center justify-center gap-2 text-sm shadow-md active:scale-95 transition-all">
-          <i data-lucide="refresh-cw" class="w-4 h-4"></i> SALVAR E SINCRONIZAR
-        </button>
+    <!-- Seção Pedidos (Carrinho) -->
+    <div class="bg-white shadow-xl rounded-2xl p-6">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4"><i data-lucide="shopping-cart" class="inline-block w-5 h-5 mr-2"></i>Carrinho de Compras</h2>
+      <div class="flex gap-2 mb-4">
+        <select id="clientSelectOrder" class="flex-1 p-2 border rounded-lg"></select>
+        <select id="productSelectOrder" class="flex-1 p-2 border rounded-lg"></select>
+        <input id="quantityInput" type="number" placeholder="Qtd" min="1" step="1" value="1" class="w-16 p-2 border rounded-lg" />
+        <button onclick="addToOrder()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2"><i data-lucide="plus-square" class="w-4 h-4"></i>Adicionar ao Pedido</button>
       </div>
-      <!-- TERMINAL LOGS FOR FAULT TRACING -->
-      <div class="bg-black border border-slate-800 rounded-2xl p-4 space-y-2">
-        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1"><i data-lucide="terminal" class="w-3.5 h-3.5"></i> Terminal de Depuração</h4>
-        <div id="terminal-debug" class="font-mono text-[11px] text-amber-400 h-28 overflow-y-auto space-y-1 bg-slate-950 p-2 rounded-lg border border-slate-900">
-          [SISTEMA]: Aguardando credenciais...
-        </div>
+      <div id="orderItems" class="mb-4">
+        <p class="text-gray-500 italic">Nenhum item no pedido.</p>
+      </div>
+      <div class="flex justify-between items-center">
+        <span id="orderTotal" class="text-lg font-bold text-gray-800">Total: R$ 0,00</span>
+        <button onclick="commitOrder()" class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition flex items-center gap-2 disabled:opacity-50" id="commitBtn" disabled><i data-lucide="check-circle" class="w-4 h-4"></i>Confirmar Pedido</button>
       </div>
     </div>
-  </main>
 
-  <!-- CONSUMPTION MODAL DRAWER -->
-  <div id="modal-billing" class="fixed inset-0 bg-slate-950/90 backdrop-blur-sm z-50 flex items-end justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-2xl p-5 space-y-4 shadow-2xl max-h-[80vh] flex flex-col">
-      <div class="flex justify-between items-start">
-        <div>
-          <h3 id="billing-client-name" class="font-black text-slate-100 text-lg">Cliente</h3>
-          <p class="text-xs text-slate-400">Saldo Disponível: <span id="billing-client-balance" class="text-emerald-400 font-mono font-bold">R$ 0,00</span></p>
-        </div>
-        <button onclick="closeBillingModal()" class="text-slate-400 bg-slate-950 p-2 rounded-xl"><i data-lucide="x" class="w-5 h-5"></i></button>
+    <!-- Seção Histórico de Pedidos -->
+    <div class="bg-white shadow-xl rounded-2xl p-6">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4"><i data-lucide="clipboard-list" class="inline-block w-5 h-5 mr-2"></i>Histórico de Pedidos</h2>
+      <ul id="orderHistory" class="space-y-2"></ul>
+    </div>
+
+    <!-- Seção Config GitHub -->
+    <div class="bg-white shadow-xl rounded-2xl p-6">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4"><i data-lucide="github" class="inline-block w-5 h-5 mr-2"></i>Configuração GitHub</h2>
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <input id="githubUsername" type="text" placeholder="Usuário" class="p-2 border rounded-lg" />
+        <input id="githubRepo" type="text" placeholder="Repositório" class="p-2 border rounded-lg" />
+        <input id="githubToken" type="password" placeholder="Token (clássico)" class="p-2 border rounded-lg" />
+        <input id="githubBranch" type="text" placeholder="Branch (ex: main)" value="main" class="p-2 border rounded-lg" />
       </div>
-      <div id="billing-products-grid" class="flex-1 overflow-y-auto space-y-2 no-scrollbar pr-1"></div>
+      <button onclick="pushToGitHub()" class="bg-gray-800 text-white px-6 py-2 rounded-lg hover:bg-gray-900 transition flex items-center gap-2"><i data-lucide="upload" class="w-4 h-4"></i>Enviar Dados para GitHub</button>
+      <p id="githubStatus" class="mt-2 text-sm text-gray-600"></p>
     </div>
   </div>
 
-  <!-- TOAST WARNING MESSAGE SYSTEM -->
-  <div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-rose-600 border border-rose-500 text-white font-extrabold px-6 py-3.5 rounded-xl shadow-2xl text-center text-xs tracking-wide opacity-0 transition-opacity duration-300 pointer-events-none z-50 uppercase">
-    ⚠️ Saldo Insuficiente para esta operação!
-  </div>
-
-  <!-- TAB NAVIGATION BAR -->
-  <nav class="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 py-2 px-3 z-40 shadow-2xl">
-    <div class="max-w-md mx-auto grid grid-cols-4 gap-1.5">
-      <button id="tab-btn-consumption" onclick="switchTab('consumption', 'Apontar Consumo', this)" class="nav-tab-btn flex flex-col items-center gap-1 py-2 rounded-xl text-amber-500 bg-amber-500/10 font-bold">
-        <i data-lucide="utensils-crossed" class="w-5 h-5"></i><span class="text-[10px]">Consumo</span>
-      </button>
-      <button onclick="switchTab('credit', 'Adicionar Crédito', this)" class="nav-tab-btn flex flex-col items-center gap-1 py-2 rounded-xl text-slate-400 hover:text-slate-200">
-        <i data-lucide="circle-dollar-sign" class="w-5 h-5"></i><span class="text-[10px]">+ Crédito</span>
-      </button>
-      <button onclick="switchTab('clients', 'Gerenciar Clientes', this)" class="nav-tab-btn flex flex-col items-center gap-1 py-2 rounded-xl text-slate-400 hover:text-slate-200">
-        <i data-lucide="users" class="w-5 h-5"></i><span class="text-[10px]">Clientes</span>
-      </button>
-      <button onclick="switchTab('products', 'Gerenciar Produtos', this)" class="nav-tab-btn flex flex-col items-center gap-1 py-2 rounded-xl text-slate-400 hover:text-slate-200">
-        <i data-lucide="package" class="w-5 h-5"></i><span class="text-[10px]">Produtos</span>
-      </button>
-    </div>
-  </nav>
-
-  <!-- JAVASCRIPT LOGIC ENGINE -->
   <script>
-    // Inicialização de variáveis globais
-    var DATABASE = { clients: [], products: [] };
-    var fileSha = null;
-    var activeClientId = null;
-    var activeTabId = 'consumption';
-    var GITHUB_CONFIG = JSON.parse(localStorage.getItem('GH_CONFIG')) || { user: '', repo: '', token: '' };
+    // ====== DADOS ======
+    let clients = [];
+    let products = [];
+    let credits = []; // { clientName, amount }
+    let orders = []; // { clientName, items: [{ productName, quantity, unitPrice }], total, date }
+    let currentOrder = []; // { productName, quantity, unitPrice }
 
-    // Atribuição de inputs das configurações de persistência
-    document.getElementById('cfg-user').value = GITHUB_CONFIG.user;
-    document.getElementById('cfg-repo').value = GITHUB_CONFIG.repo;
-    document.getElementById('cfg-token').value = GITHUB_CONFIG.token;
-
-    function logDebug(msg) {
-      var el = document.getElementById('terminal-debug');
-      if (el) {
-        el.innerHTML += "<div>[" + new Date().toLocaleTimeString() + "]: " + msg + "</div>";
-        el.scrollTop = el.scrollHeight;
-      }
+    // ====== TOAST ======
+    function showToast(message, isError = false) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = 'fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 transition-opacity duration-300 ' + (isError ? 'bg-red-500 text-white' : 'bg-green-500 text-white');
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3000);
     }
 
-    function utf8_to_b64(str) {
-      return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
-        return String.fromCharCode(parseInt(p1, 16));
-      }));
-    }
-
-    function b64_to_utf8(str) {
-      var cleanStr = str.replace(/\s/g, '');
-      return decodeURIComponent(atob(cleanStr).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-      }).join(''));
-    }
-
-    function saveConfig() {
-      GITHUB_CONFIG.user = document.getElementById('cfg-user').value.trim();
-      GITHUB_CONFIG.repo = document.getElementById('cfg-repo').value.trim();
-      GITHUB_CONFIG.token = document.getElementById('cfg-token').value.trim();
-      localStorage.setItem('GH_CONFIG', JSON.stringify(GITHUB_CONFIG));
-      logDebug("Configurações salvas locais. Tentando parear...");
-      fetchFromGitHub();
-    }
-
-    async function fetchFromGitHub() {
-  if (!GITHUB_CONFIG.token || !GITHUB_CONFIG.user || !GITHUB_CONFIG.repo) {
-    logDebug("Aviso: Faltam parâmetros de credenciais Git.");
-    return;
-  }
-  var statusEl = document.getElementById('cloud-status');
-  statusEl.innerText = "🔌 SINCRONIZANDO...";
-  statusEl.className = "text-[9px] text-amber-400 font-bold tracking-wide uppercase";
-  
-  // RIGHT WAY: Points to the API domain with the correct folder slashes built-in
-  var url = "https://github.com" + GITHUB_CONFIG.user + "/" + GITHUB_CONFIG.repo + "/contents/dados.json";
-
-
-  try {
-    var response = await fetch(url, {
-      method: 'GET',
-      mode: 'cors', // FORCES THE BROWSER PROTOCOL ENGINE TO HANDLE CORS HANDSHAKES
-      headers: { 
-        'Authorization': "token " + GITHUB_CONFIG.token, 
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json'
-      }
-    });
-    
-    if (response.ok) {
-      var data = await response.json();
-      fileSha = data.sha;
-      DATABASE = JSON.parse(b64_to_utf8(data.content));
-      statusEl.innerText = "☁️ BANCO CONECTADO";
-      statusEl.className = "text-[9px] text-emerald-400 font-bold tracking-wide uppercase";
-      logDebug("Sucesso: Dados em Nuvem sincronizados!");
-      refreshActiveView();
-    } else {
-      var errRes = await response.json();
-      logDebug("Erro Git " + response.status + ": " + errRes.message);
-      statusEl.innerText = "⚠️ ERRO DE LOGIN";
-      statusEl.className = "text-[9px] text-rose-500 font-bold tracking-wide uppercase";
-    }
-  } catch (err) {
-    logDebug("Falha: Erro de rede ou CORS.");
-    statusEl.innerText = "⚠️ SEM INTERNET";
-    statusEl.className = "text-[9px] text-rose-500 font-bold tracking-wide uppercase";
-  }
-}
-
-
-
-    async function pushToGitHub() {
-      if (!GITHUB_CONFIG.token) return;
-      var statusEl = document.getElementById('cloud-status');
-      statusEl.innerText = "⏳ GRAVANDO...";
-      statusEl.className = "text-[9px] text-amber-400 font-bold tracking-wide uppercase";
-      
-      var url = "https://api.github.com/repos/" + GITHUB_CONFIG.user + "/" + GITHUB_CONFIG.repo + "/contents/dados.json";
-      var jsonString = JSON.stringify(DATABASE, null, 2);
-      var base64Content = utf8_to_b64(jsonString);
-      var body = {
-        message: "📱 Transação realizada via Mobile Client Dashboard",
-        content: base64Content,
-        sha: fileSha
-      };
-      
-      try {
-        var response = await fetch(url, {
-          method: 'PUT',
-          headers: {
-            'Authorization': "Bearer " + GITHUB_CONFIG.token,
-            'Accept': 'application/vnd.github+json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(body)
-        });
-        if (response.ok) {
-          var data = await response.json();
-          fileSha = data.content.sha;
-          statusEl.innerText = "☁️ BANCO CONECTADO";
-          statusEl.className = "text-[9px] text-emerald-400 font-bold tracking-wide uppercase";
-          logDebug("Sucesso: Transação salva na nuvem!");
-        } else {
-          var errRes = await response.json();
-          logDebug("Erro de Escrita " + response.status + ": " + errRes.message);
-          if(response.status === 409) { 
-            logDebug("Conflito de SHA! Forçando re-sincronização..."); 
-            fetchFromGitHub(); 
-          }
-        }
-      } catch (err) {
-        logDebug("Falha: Não foi possível enviar transação.");
-      }
-    }
-
-    function switchTab(tabId, title, btnElement) {
-      activeTabId = tabId;
-      document.querySelectorAll('.view-tab').forEach(function(el) { 
-        el.classList.add('hidden'); 
-      });
-      document.getElementById("view-" + tabId).classList.remove('hidden');
-      document.getElementById('view-title').innerText = title;
-      
-      document.querySelectorAll('.nav-tab-btn').forEach(function(btn) {
-        btn.className = "nav-tab-btn flex flex-col items-center gap-1 py-2 rounded-xl text-slate-400 hover:text-slate-200 transition-all";
-      });
-      
-      if(btnElement && btnElement.classList.contains('nav-tab-btn')) {
-        btnElement.className = "nav-tab-btn flex flex-col items-center gap-1 py-2 rounded-xl text-amber-500 bg-amber-500/10 font-bold transition-all";
-      }
-      refreshActiveView();
-    }
-
-    function refreshActiveView() {
-      if (activeTabId === 'consumption') renderConsumptionView();
-      if (activeTabId === 'credit') renderCreditView();
-      if (activeTabId === 'clients') renderClientsView();
-      if (activeTabId === 'products') renderProductsView();
-    }
-
-    // --- RENDERING CORE CONTROLLERS ---
-    function generateConsumptionRow(client) {
-      var isZero = client.balance <= 0;
-      var out = "";
-      out += '<div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex justify-between items-center shadow-sm">';
-      out += '  <div onclick="' + (isZero ? '' : 'openBillingModal(\'' + client.id + '\')') + '" class="flex-1 cursor-pointer">';
-      out += '    <h4 class="font-extrabold text-sm ' + (isZero ? 'text-slate-500 line-through' : 'text-slate-100') + '">' + client.name + '</h4>';
-      out += '    <p class="text-xs font-mono font-black mt-1 ' + (isZero ? 'text-rose-500 bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded w-max text-[10px]' : 'text-emerald-400') + '">';
-      out += isZero ? 'SALDO ZERADO' : 'Disponível: R$ ' + client.balance.toFixed(2).replace('.', ',');
-      out += '    </p>';
-      out += '  </div>';
-      if (!isZero) {
-        out += '  <button onclick="openBillingModal(\'' + client.id + '\')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs px-4 py-3 rounded-xl flex items-center gap-1 transition-all"><i data-lucide="utensils-crossed" class="w-3.5 h-3.5"></i> DEBITAR</button>';
-      }
-      out += '</div>';
-      return out;
-    }
-
-    function generateBillingButton(product) {
-      var out = "";
-      out += '<button onclick="executeDebit(' + product.price + ', \'' + product.name + '\')" class="w-full bg-slate-950 border border-slate-800 hover:border-amber-500 p-4 rounded-xl flex justify-between items-center text-left transition-colors">';
-      out += '  <span class="font-extrabold text-slate-200 text-xs">' + product.name + '</span>';
-      out += '  <span class="text-amber-400 font-mono font-black text-xs">R$ ' + product.price.toFixed(2).replace('.', ',') + '</span>';
-      out += '</button>';
-      return out;
-    }
-
-    function generateCreditRow(client) {
-      var out = "";
-      out += '<div onclick="triggerAddCreditFlow(\'' + client.id + '\')" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex justify-between items-center cursor-pointer hover:border-slate-700 transition-all">';
-      out += '  <div>';
-      out += '    <h4 class="font-bold text-slate-200 text-sm">' + client.name + '</h4>';
-      out += '    <p class="text-xs font-mono text-slate-400">Saldo: R$ ' + client.balance.toFixed(2).replace('.', ',') + '</p>';
-      out += '  </div>';
-      out += '  <button class="bg-emerald-600 text-white font-black text-xs px-4 py-3 rounded-xl flex items-center gap-1"><i data-lucide="plus" class="w-3.5 h-3.5"></i> ADICIONAR</button>';
-      out += '</div>';
-      return out;
-    }
-
-    // Retorna a linha do cliente com a sua respectiva função de remoção
-    function generateClientRow(client) {
-      var out = "";
-      out += '<div class="bg-slate-900 p-3 rounded-xl flex justify-between items-center text-sm border border-slate-800">';
-      out += '  <span class="font-bold text-slate-300">' + client.name + '</span>';
-      out += '  <button onclick="deleteClient(\'' + client.id + '\')" class="text-rose-400 p-1 hover:bg-rose-500/10 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4"></i></button>';
-      out += '</div>';
-      return out;
-    }
-
-    // Retorna a linha do produto com o preço formatado e botão de exclusão
-    function generateProductRow(product) {
-      var out = "";
-      out += '<div class="bg-slate-900 p-3 rounded-xl flex justify-between items-center text-sm border border-slate-800">';
-      out += '  <span class="font-medium text-slate-300">' + product.name + '</span>';
-      out += '  <div class="flex items-center gap-3">';
-      out += '    <span class="text-amber-400 font-mono font-bold">R$ ' + product.price.toFixed(2).replace('.', ',') + '</span>';
-      out += '    <button onclick="deleteProduct(\'' + product.id + '\')" class="text-rose-400 p-1 hover:bg-rose-500/10 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4"></i></button>';
-      out += '  </div>';
-      out += '</div>';
-      return out;
-    }
-
-    function renderConsumptionView() {
-      var query = document.getElementById('search-consumption-client').value.toLowerCase();
-      var container = document.getElementById('consumption-list');
-      var filtered = DATABASE.clients.filter(function(c) { return c.name.toLowerCase().includes(query); });
-      if(filtered.length === 0) { 
-        container.innerHTML = '<p class="text-xs text-slate-600 text-center py-6">Nenhum cliente ativo.</p>'; 
-        return; 
-      }
-      var html = "";
-      for(var i = 0; i < filtered.length; i++) {
-        html += generateConsumptionRow(filtered[i]);
-      }
-      container.innerHTML = html;
-      lucide.createIcons();
-    }
-
-    function openBillingModal(id) {
-      activeClientId = id;
-      var client = DATABASE.clients.find(function(c) { return c.id == id; });
-      document.getElementById('billing-client-name').innerText = client.name;
-      document.getElementById('billing-client-balance').innerText = "R$ " + client.balance.toFixed(2).replace('.', ',');
-      var container = document.getElementById('billing-products-grid');
-      if(DATABASE.products.length === 0){
-        container.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">Nenhum produto cadastrado.</p>';
-      } else {
-        var html = "";
-        for(var i = 0; i < DATABASE.products.length; i++) {
-          html += generateBillingButton(DATABASE.products[i]);
-        }
-        container.innerHTML = html;
-      }
-      document.getElementById('modal-billing').classList.remove('hidden');
-    }
-
-    function closeBillingModal() { 
-      document.getElementById('modal-billing').classList.add('hidden'); 
-      activeClientId = null; 
-    }
-
-    function executeDebit(price, name) {
-      var client = DATABASE.clients.find(function(c) { return c.id == activeClientId; });
-      if (client.balance >= price) {
-        client.balance -= price;
-        document.getElementById('billing-client-balance').innerText = "R$ " + client.balance.toFixed(2).replace('.', ',');
-        renderConsumptionView();
-        pushToGitHub();
-        if (client.balance <= 0) closeBillingModal();
-      } else {
-        triggerToast();
-      }
-    }
-
-    function renderCreditView() {
-      var container = document.getElementById('credit-list');
-      if(DATABASE.clients.length === 0) { 
-        container.innerHTML = '<p class="text-xs text-slate-600 text-center py-6">Nenhum cliente cadastrado.</p>'; 
-        return; 
-      }
-      var html = "";
-      for(var i = 0; i < DATABASE.clients.length; i++) {
-        html += generateCreditRow(DATABASE.clients[i]);
-      }
-      container.innerHTML = html;
-      lucide.createIcons();
-    }
-
-    function triggerAddCreditFlow(id) {
-      var client = DATABASE.clients.find(function(c) { return c.id == id; });
-      var value = parseFloat(prompt("Quanto de crédito R$ para colocar na conta de: " + client.name + "?"));
-      if (isNaN(value) || value <= 0) return;
-      client.balance += value;
-      renderCreditView();
-      pushToGitHub();
-    }
-
+    // ====== CLIENTES ======
     function addClient() {
-      var input = document.getElementById('input-client-name');
-      var val = input.value.trim();
-      if (!val) return;
-      DATABASE.clients.push({ id: Date.now().toString(), name: val, balance: 0.00 });
-      input.value = '';
-      renderClientsView();
-      pushToGitHub();
+      const name = document.getElementById('clientNameInput').value.trim();
+      if (!name) {
+        showToast('Nome do cliente é obrigatório.', true);
+        return;
+      }
+      if (clients.includes(name)) {
+        showToast('Cliente já existe.', true);
+        return;
+      }
+      clients.push(name);
+      document.getElementById('clientNameInput').value = '';
+      showToast('Cliente adicionado: ' + name);
+      renderClients();
+      updateSelects();
     }
 
-    function renderClientsView() {
-      var container = document.getElementById('clients-registry-list');
-      if(DATABASE.clients.length === 0) { 
-        container.innerHTML = '<p class="text-xs text-slate-600 text-center py-6">Nenhum cliente cadastrado.</p>'; 
-        return; 
-      }
-      var html = "";
-      for(var i = 0; i < DATABASE.clients.length; i++) {
-        html += generateClientRow(DATABASE.clients[i]);
-      }
-      container.innerHTML = html;
+    function renderClients() {
+      const ul = document.getElementById('clientList');
+      ul.innerHTML = clients.map(client => '<li class="flex justify-between items-center p-2 bg-gray-50 rounded"><span>' + escapeHTML(client) + '</span><button onclick="deleteClient(\'' + escapeHTML(client) + '\')" class="text-red-500 hover:text-red-700"><i data-lucide="trash-2" class="w-4 h-4"></i></button></li>').join('');
       lucide.createIcons();
     }
 
-    function deleteClient(id) {
-      if(confirm("Remover este cliente permanentemente?")) {
-        DATABASE.clients = DATABASE.clients.filter(function(c) { return c.id != id; });
-        renderClientsView();
-        pushToGitHub();
-      }
+    function deleteClient(name) {
+      clients = clients.filter(c => c !== name);
+      credits = credits.filter(c => c.clientName !== name);
+      currentOrder = [];
+      renderClients();
+      updateSelects();
+      showToast('Cliente removido: ' + name);
     }
 
+    // ====== PRODUTOS ======
     function addProduct() {
-      var nameInput = document.getElementById('input-product-name');
-      var priceInput = document.getElementById('input-product-price');
-      var price = parseFloat(priceInput.value);
-      var name = nameInput.value.trim();
-      if (!name || isNaN(price)) return;
-      DATABASE.products.push({ id: Date.now().toString(), name: name, price: price });
-      nameInput.value = ''; priceInput.value = '';
-      renderProductsView();
-      pushToGitHub();
+      const name = document.getElementById('productNameInput').value.trim();
+      const price = parseFloat(document.getElementById('productPriceInput').value);
+      if (!name) {
+        showToast('Nome do produto é obrigatório.', true);
+        return;
+      }
+      if (isNaN(price) || price < 0) {
+        showToast('Preço deve ser um número não negativo.', true);
+        return;
+      }
+      if (products.some(p => p.name === name)) {
+        showToast('Produto já existe.', true);
+        return;
+      }
+      products.push({ name, price });
+      document.getElementById('productNameInput').value = '';
+      document.getElementById('productPriceInput').value = '';
+      showToast('Produto adicionado: ' + name + ' - R$ ' + price.toFixed(2));
+      renderProducts();
+      updateSelects();
     }
 
-    function renderProductsView() {
-      var container = document.getElementById('products-registry-list');
-      if(DATABASE.products.length === 0) { 
-        container.innerHTML = '<p class="text-xs text-slate-600 text-center py-6">Nenhum produto cadastrado.</p>'; 
-        return; 
-      }
-      var html = "";
-      for(var i = 0; i < DATABASE.products.length; i++) {
-        html += generateProductRow(DATABASE.products[i]);
-      }
-      container.innerHTML = html;
+    function renderProducts() {
+      const ul = document.getElementById('productList');
+      ul.innerHTML = products.map(p => '<li class="flex justify-between items-center p-2 bg-gray-50 rounded"><span>' + escapeHTML(p.name) + ' - R$ ' + p.price.toFixed(2) + '</span><button onclick="deleteProduct(\'' + escapeHTML(p.name) + '\')" class="text-red-500 hover:text-red-700"><i data-lucide="trash-2" class="w-4 h-4"></i></button></li>').join('');
       lucide.createIcons();
     }
 
-    function deleteProduct(id) {
-      if(confirm("Excluir este produto do catálogo?")) {
-        DATABASE.products = DATABASE.products.filter(function(p) { return p.id != id; });
-        renderProductsView();
-        pushToGitHub();
-      }
+    function deleteProduct(name) {
+      products = products.filter(p => p.name !== name);
+      currentOrder = currentOrder.filter(item => item.productName !== name);
+      renderProducts();
+      updateSelects();
+      showToast('Produto removido: ' + name);
     }
 
-    function triggerToast() {
-      var toast = document.getElementById('toast');
-      if (toast) {
-        toast.style.opacity = "1";
-        setTimeout(function() { toast.style.opacity = "0"; }, 2500);
+    // ====== CRÉDITO ======
+    function addCredit() {
+      const clientSelect = document.getElementById('clientSelectCredit');
+      const clientName = clientSelect.value;
+      if (!clientName) {
+        showToast('Selecione um cliente.', true);
+        return;
       }
+      const amount = parseFloat(document.getElementById('creditAmountInput').value);
+      if (isNaN(amount) || amount <= 0) {
+        showToast('Valor deve ser positivo.', true);
+        return;
+      }
+      const existing = credits.find(c => c.clientName === clientName);
+      if (existing) {
+        existing.amount += amount;
+      } else {
+        credits.push({ clientName, amount });
+      }
+      document.getElementById('creditAmountInput').value = '';
+      showToast('Crédito adicionado: R$ ' + amount.toFixed(2) + ' para ' + clientName);
+      renderCredits();
     }
 
-    // Inicialização da biblioteca de ícones
+    function renderCredits() {
+      const ul = document.getElementById('creditList');
+      ul.innerHTML = credits.map(c => '<li class="flex justify-between items-center p-2 bg-gray-50 rounded"><span>' + escapeHTML(c.clientName) + ': R$ ' + c.amount.toFixed(2) + '</span><button onclick="deleteCredit(\'' + escapeHTML(c.clientName) + '\')" class="text-red-500 hover:text-red-700"><i data-lucide="trash-2" class="w-4 h-4"></i></button></li>').join('');
+      lucide.createIcons();
+    }
+
+    function deleteCredit(clientName) {
+      credits = credits.filter(c => c.clientName !== clientName);
+      renderCredits();
+      showToast('Crédito removido para: ' + clientName);
+    }
+
+    // ====== PEDIDOS (CARRINHO) ======
+    function updateSelects() {
+      const clientSelects = ['clientSelectCredit', 'clientSelectOrder'];
+      clientSelects.forEach(id => {
+        const select = document.getElementById(id);
+        select.innerHTML = '<option value="">Selecione um cliente</option>' + clients.map(c => '<option value="' + escapeHTML(c) + '">' + escapeHTML(c) + '</option>').join('');
+      });
+
+      const productSelect = document.getElementById('productSelectOrder');
+      productSelect.innerHTML = '<option value="">Selecione um produto</option>' + products.map(p => '<option value="' + escapeHTML(p.name) + '">' + escapeHTML(p.name) + ' - R$ ' + p.price.toFixed(2) + '</option>').join('');
+    }
+
+    function addToOrder() {
+      const clientName = document.getElementById('clientSelectOrder').value;
+      const productName = document.getElementById('productSelectOrder').value;
+      const quantity = parseInt(document.getElementById('quantityInput').value);
+
+      if (!clientName) {
+        showToast('Selecione um cliente.', true);
+        return;
+      }
+      if (!productName) {
+        showToast('Selecione um produto.', true);
+        return;
+      }
+      if (isNaN(quantity) || quantity < 1) {
+        showToast('Quantidade deve ser um número inteiro positivo.', true);
+        return;
+      }
+
+      const product = products.find(p => p.name === productName);
+      if (!product) {
+        showToast('Produto não encontrado.', true);
+        return;
+      }
+
+      // Adicionar ou atualizar quantidade no carrinho
+      const existing = currentOrder.find(item => item.productName === productName);
+      if (existing) {
+        existing.quantity += quantity;
+      } else {
+        currentOrder.push({ productName, quantity, unitPrice: product.price });
+      }
+
+      document.getElementById('quantityInput').value = 1;
+      showToast('Item adicionado ao carrinho.');
+      renderOrder();
+    }
+
+    function removeFromOrder(productName) {
+      currentOrder = currentOrder.filter(item => item.productName !== productName);
+      renderOrder();
+      showToast('Item removido do carrinho.');
+    }
+
+    function renderOrder() {
+      const container = document.getElementById('orderItems');
+      const totalSpan = document.getElementById('orderTotal');
+      const commitBtn = document.getElementById('commitBtn');
+
+      if (currentOrder.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 italic">Nenhum item no pedido.</p>';
+        totalSpan.textContent = 'Total: R$ 0,00';
+        commitBtn.disabled = true;
+        return;
+      }
+
+      let total = 0;
+      let html = '<ul class="space-y-2">';
+      currentOrder.forEach(item => {
+        const subtotal = item.quantity * item.unitPrice;
+        total += subtotal;
+        html += '<li class="flex justify-between items-center p-2 bg-gray-50 rounded">' +
+          '<span>' + escapeHTML(item.productName) + ' x' + item.quantity + ' - R$ ' + item.unitPrice.toFixed(2) + ' = R$ ' + subtotal.toFixed(2) + '</span>' +
+          '<button onclick="removeFromOrder(\'' + escapeHTML(item.productName) + '\')" class="text-red-500 hover:text-red-700"><i data-lucide="x-circle" class="w-4 h-4"></i></button>' +
+        '</li>';
+      });
+      html += '</ul>';
+      container.innerHTML = html;
+      totalSpan.textContent = 'Total: R$ ' + total.toFixed(2);
+      commitBtn.disabled = false;
+      lucide.createIcons();
+    }
+
+    function commitOrder() {
+      const clientName = document.getElementById('clientSelectOrder').value;
+      if (!clientName) {
+        showToast('Selecione um cliente.', true);
+        return;
+      }
+      if (currentOrder.length === 0) {
+        showToast('Carrinho vazio.', true);
+        return;
+      }
+
+      const total = currentOrder.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
+
+      // Registrar pedido
+      const order = {
+        clientName,
+        items: currentOrder.map(item => ({ ...item })),
+        total,
+        date: new Date().toLocaleString('pt-BR')
+      };
+      orders.push(order);
+
+      // Debitar do crédito (permitindo negativo)
+      const credit = credits.find(c => c.clientName === clientName);
+      if (credit) {
+        credit.amount -= total;
+      } else {
+        credits.push({ clientName, amount: -total });
+      }
+
+      // Limpar carrinho
+      currentOrder = [];
+      renderOrder();
+      renderCredits();
+      renderOrderHistory();
+      showToast('Pedido confirmado! Débito de R$ ' + total.toFixed(2) + ' para ' + clientName);
+    }
+
+    function renderOrderHistory() {
+      const ul = document.getElementById('orderHistory');
+      if (orders.length === 0) {
+        ul.innerHTML = '<p class="text-gray-500 italic">Nenhum pedido realizado.</p>';
+        return;
+      }
+      ul.innerHTML = orders.map((order, index) => {
+        const itemsHtml = order.items.map(item => escapeHTML(item.productName) + ' x' + item.quantity + ' (R$ ' + item.unitPrice.toFixed(2) + ')').join(', ');
+        return '<li class="p-2 bg-gray-50 rounded"><strong>#' + (index+1) + '</strong> ' + escapeHTML(order.clientName) + ' - Total: R$ ' + order.total.toFixed(2) + '<br><small>' + itemsHtml + ' - ' + order.date + '</small></li>';
+      }).join('');
+    }
+
+    // ====== GITHUB ======
+    function pushToGitHub() {
+      const username = document.getElementById('githubUsername').value.trim();
+      const repo = document.getElementById('githubRepo').value.trim();
+      const token = document.getElementById('githubToken').value.trim();
+      const branch = document.getElementById('githubBranch').value.trim() || 'main';
+
+      if (!username || !repo || !token) {
+        showToast('Preencha todos os campos do GitHub.', true);
+        return;
+      }
+
+      const data = {
+        clients,
+        products,
+        credits,
+        orders
+      };
+      const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+
+      const url = `https://api.github.com/repos/${username}/${repo}/contents/dados.json`;
+
+      fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Authorization': 'token ' + token,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: 'Atualização dos dados do sistema',
+          content: content,
+          branch: branch
+        })
+      })
+      .then(response => {
+        if (!response.ok) {
+          return response.json().then(err => { throw new Error(err.message); });
+        }
+        return response.json();
+      })
+      .then(() => {
+        showToast('Dados enviados ao GitHub com sucesso!');
+        document.getElementById('githubStatus').textContent = 'Último envio: ' + new Date().toLocaleString('pt-BR');
+      })
+      .catch(error => {
+        showToast('Erro ao enviar para GitHub: ' + error.message, true);
+        document.getElementById('githubStatus').textContent = 'Erro: ' + error.message;
+      });
+    }
+
+    // ====== UTILITÁRIOS ======
+    function escapeHTML(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    // ====== INICIALIZAÇÃO ======
+    updateSelects();
+    renderOrder();
+    renderOrderHistory();
     lucide.createIcons();
-
-    // Sincronização inicial com o GitHub ao carregar
-    fetchFromGitHub();
   </script>
 </body>
 </html>
