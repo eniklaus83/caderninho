@@ -1,594 +1,968 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Caderninho Digital Pro</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
   <style>
-    body {
-      background-color: #0f172a;
-      color: #f1f5f9;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    .toast {
-      position: fixed;
-      top: 1rem;
-      right: 1rem;
-      background: #1e293b;
-      color: #fbbf24;
-      padding: 0.75rem 1.5rem;
-      border-radius: 0.5rem;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3);
-      z-index: 1000;
-      display: none;
-    }
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.7);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 50;
-    }
-    .modal-content {
-      background: #1e293b;
-      padding: 2rem;
-      border-radius: 0.75rem;
-      width: 90%;
-      max-width: 500px;
-    }
-    .header {
-      position: sticky;
-      top: 0;
-      background: #0f172a;
-      z-index: 40;
-      border-bottom: 1px solid #334155;
-    }
-    .bottom-bar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: #1e293b;
-      border-top: 1px solid #334155;
-      display: flex;
-      justify-content: space-around;
-      padding: 0.5rem 0;
-      z-index: 30;
-    }
-    .tab-btn {
-      background: transparent;
-      border: none;
-      color: #94a3b8;
-      padding: 0.5rem 1rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .tab-btn.active {
-      color: #fbbf24;
-      border-bottom: 2px solid #fbbf24;
-    }
-    .btn-primary {
-      background: #f59e0b;
-      color: #0f172a;
-      padding: 0.5rem 1rem;
-      border-radius: 0.5rem;
-      font-weight: 600;
-    }
-    .btn-danger {
-      background: #e11d48;
-      color: white;
-      padding: 0.5rem 1rem;
-      border-radius: 0.5rem;
-    }
-    .btn-success {
-      background: #10b981;
-      color: white;
-      padding: 0.5rem 1rem;
-      border-radius: 0.5rem;
-    }
-    .table-custom {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .table-custom th, .table-custom td {
-      padding: 0.75rem;
-      border-bottom: 1px solid #334155;
-      text-align: left;
-    }
-    .table-custom th {
-      color: #fbbf24;
-    }
-    .input-custom {
-      background: #1e293b;
-      border: 1px solid #475569;
-      color: #f1f5f9;
-      padding: 0.5rem;
-      border-radius: 0.5rem;
-      width: 100%;
-    }
-    .card {
-      background: #1e293b;
-      border-radius: 0.75rem;
-      padding: 1rem;
-      margin-bottom: 1rem;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; display: flex; flex-direction: column; }
+    .header { position: sticky; top: 0; z-index: 50; background: #1e293b; border-bottom: 1px solid #334155; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
+    .header h1 { font-size: 1.25rem; font-weight: 700; color: #fbbf24; display: flex; align-items: center; gap: 8px; }
+    .github-status { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: #94a3b8; cursor: pointer; }
+    .github-status .indicator { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
+    .github-status .indicator.syncing { background: #facc15; animation: pulse 1s infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .content { flex: 1; padding: 16px; padding-bottom: 80px; overflow-y: auto; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; background: #1e293b; border-top: 1px solid #334155; display: flex; justify-content: space-around; padding: 8px 0; padding-bottom: max(8px, env(safe-area-inset-bottom)); }
+    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 0.65rem; color: #64748b; cursor: pointer; transition: color 0.2s; }
+    .nav-item.active { color: #fbbf24; }
+    .nav-item i { width: 24px; height: 24px; }
+    .card { background: #1e293b; border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid #334155; }
+    .card-title { font-size: 1rem; font-weight: 600; margin-bottom: 12px; color: #fbbf24; }
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 0.875rem; color: #94a3b8; margin-bottom: 4px; }
+    .form-group input, .form-group select { width: 100%; padding: 10px 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #e2e8f0; font-size: 0.875rem; outline: none; transition: border-color 0.2s; }
+    .form-group input:focus, .form-group select:focus { border-color: #fbbf24; }
+    .btn { padding: 10px 16px; border: none; border-radius: 8px; font-weight: 600; font-size: 0.875rem; cursor: pointer; transition: background 0.2s, transform 0.1s; display: inline-flex; align-items: center; gap: 6px; }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: #f59e0b; color: #0f172a; }
+    .btn-primary:hover { background: #d97706; }
+    .btn-danger { background: #ef4444; color: white; }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-success { background: #10b981; color: white; }
+    .btn-success:hover { background: #059669; }
+    .btn-secondary { background: #334155; color: #e2e8f0; }
+    .btn-secondary:hover { background: #475569; }
+    .btn-sm { padding: 6px 12px; font-size: 0.75rem; }
+    .flex { display: flex; }
+    .flex-col { flex-direction: column; }
+    .gap-2 { gap: 8px; }
+    .gap-3 { gap: 12px; }
+    .gap-4 { gap: 16px; }
+    .items-center { align-items: center; }
+    .justify-between { justify-content: space-between; }
+    .justify-center { justify-content: center; }
+    .mt-2 { margin-top: 8px; }
+    .mt-4 { margin-top: 16px; }
+    .mb-2 { margin-bottom: 8px; }
+    .w-full { width: 100%; }
+    .text-xs { font-size: 0.75rem; }
+    .text-sm { font-size: 0.875rem; }
+    .text-amber { color: #fbbf24; }
+    .text-emerald { color: #34d399; }
+    .text-rose { color: #f43f5e; }
+    .text-muted { color: #64748b; }
+    .text-center { text-align: center; }
+    .toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: #1e293b; border: 1px solid #334155; padding: 12px 20px; border-radius: 8px; font-size: 0.875rem; color: #e2e8f0; z-index: 100; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+    .toast.show { opacity: 1; }
+    .toast.error { border-color: #ef4444; color: #fca5a5; }
+    .toast.success { border-color: #10b981; color: #a7f3d0; }
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: flex-end; justify-content: center; z-index: 60; }
+    .modal-content { background: #1e293b; border-radius: 16px 16px 0 0; padding: 24px; width: 100%; max-width: 500px; max-height: 80vh; overflow-y: auto; }
+    .modal-title { font-size: 1.125rem; font-weight: 700; color: #fbbf24; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .close-btn { background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; }
+    .list-item { background: #0f172a; border-radius: 8px; padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+    .list-item .info { flex: 1; }
+    .list-item .actions { display: flex; gap: 8px; }
+    .badge { font-size: 0.7rem; padding: 2px 8px; border-radius: 999px; background: #334155; color: #94a3b8; }
+    .badge.amber { background: #f59e0b33; color: #fbbf24; }
+    .badge.emerald { background: #10b98133; color: #34d399; }
+    .badge.rose { background: #ef444433; color: #f43f5e; }
+    .search-input { padding-left: 36px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: 10px center; background-size: 18px; }
+    .carrinho-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #334155; }
+    .carrinho-item:last-child { border-bottom: none; }
+    .qty-controls { display: flex; align-items: center; gap: 6px; }
+    .qty-controls button { width: 28px; height: 28px; border-radius: 50%; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+    .qty-controls span { min-width: 20px; text-align: center; }
   </style>
 </head>
 <body>
-  <div id="toast" class="toast"></div>
+  <div class="toast" id="toast"></div>
+  <header class="header">
+    <h1><i data-lucide="notebook-text"></i> Caderninho Digital Pro</h1>
+    <div class="github-status" id="githubStatus" onclick="importarDeGitHub()">
+      <span class="indicator" id="syncIndicator"></span>
+      <span id="syncLabel">Sincronizado</span>
+    </div>
+  </header>
 
-  <!-- Header -->
-  <div class="header p-4">
-    <h1 class="text-2xl font-bold text-amber-400">Caderninho Digital Pro</h1>
+  <div class="content" id="mainContent">
+    <div class="tab-content active" id="tab-consumo">
+      <div class="card">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="card-title" style="margin-bottom:0;">
+            <i data-lucide="coffee" style="width:20px;height:20px;"></i> Consumo
+          </h2>
+          <span class="badge amber" id="cartItemsCount">0 itens</span>
+        </div>
+        <div class="form-group">
+          <label>Buscar Cliente</label>
+          <input type="text" class="search-input" id="consumoClienteSearch" placeholder="Nome do cliente..." oninput="filtrarClientesConsumo()">
+        </div>
+        <div id="consumoClienteList"></div>
+        <div id="consumoClienteSelected" style="display:none;" class="mt-2">
+          <div class="flex items-center justify-between">
+            <span id="consumoClienteNome" class="font-semibold"></span>
+            <button class="btn btn-sm btn-secondary" onclick="limparClienteConsumo()">Trocar</button>
+          </div>
+          <div class="form-group mt-2">
+            <label>Produtos</label>
+            <select id="consumoProdutoSelect"><option value="">Selecione um produto</option></select>
+          </div>
+          <div class="form-group">
+            <label>Quantidade</label>
+            <input type="number" id="consumoQtd" value="1" min="1" max="999">
+          </div>
+          <button class="btn btn-primary w-full" onclick="addCarrinho()">
+            <i data-lucide="shopping-cart" style="width:16px;height:16px;"></i> Adicionar ao Carrinho
+          </button>
+          <div id="carrinhoContainer" class="mt-4">
+            <h3 class="text-sm font-semibold mb-2">
+              <i data-lucide="list" style="width:16px;height:16px;"></i> Carrinho
+            </h3>
+            <div id="carrinhoItems"></div>
+            <div class="flex items-center justify-between mt-2">
+              <span class="font-bold text-amber" id="carrinhoTotal">Total: R$ 0,00</span>
+              <button class="btn btn-success btn-sm" onclick="confirmarPedido()">
+                <i data-lucide="check-circle" style="width:16px;height:16px;"></i> Confirmar Pedido
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tab-credito">
+      <div class="card">
+        <h2 class="card-title"><i data-lucide="wallet" style="width:20px;height:20px;"></i> Crédito / Débito</h2>
+        <div class="form-group">
+          <label>Buscar Cliente</label>
+          <input type="text" class="search-input" id="creditoClienteSearch" placeholder="Nome do cliente..." oninput="filtrarClientesCredito()">
+        </div>
+        <div id="creditoClienteList"></div>
+        <div id="creditoClienteSelected" style="display:none;" class="mt-2">
+          <div class="flex items-center justify-between">
+            <span id="creditoClienteNome" class="font-semibold"></span>
+            <span id="creditoSaldoAtual" class="text-emerald"></span>
+            <button class="btn btn-sm btn-secondary" onclick="limparClienteCredito()">Trocar</button>
+          </div>
+          <div class="form-group mt-2">
+            <label>Tipo</label>
+            <select id="creditoTipo">
+              <option value="credito">Crédito (+)</option>
+              <option value="debito">Débito (-)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Valor (R$)</label>
+            <input type="number" id="creditoValor" step="0.01" min="0" placeholder="0,00">
+          </div>
+          <button class="btn btn-primary w-full" onclick="creditarDebitar()">
+            <i data-lucide="arrow-right-left" style="width:16px;height:16px;"></i> Confirmar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tab-clientes">
+      <div class="card">
+        <div class="flex items-center justify-between">
+          <h2 class="card-title" style="margin-bottom:0;"><i data-lucide="users" style="width:20px;height:20px;"></i> Clientes</h2>
+          <button class="btn btn-primary btn-sm" onclick="abrirModalCliente()">
+            <i data-lucide="plus" style="width:16px;height:16px;"></i> Novo
+          </button>
+        </div>
+        <div class="form-group mt-2">
+          <input type="text" class="search-input" id="clienteSearch" placeholder="Buscar cliente..." oninput="renderizarClientes()">
+        </div>
+        <div id="clienteLista"></div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tab-produtos">
+      <div class="card">
+        <div class="flex items-center justify-between">
+          <h2 class="card-title" style="margin-bottom:0;"><i data-lucide="package" style="width:20px;height:20px;"></i> Produtos</h2>
+          <button class="btn btn-primary btn-sm" onclick="abrirModalProduto()">
+            <i data-lucide="plus" style="width:16px;height:16px;"></i> Novo
+          </button>
+        </div>
+        <div class="form-group mt-2">
+          <input type="text" class="search-input" id="produtoSearch" placeholder="Buscar produto..." oninput="renderizarProdutos()">
+        </div>
+        <div id="produtoLista"></div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tab-pedidos">
+      <div class="card">
+        <h2 class="card-title"><i data-lucide="history" style="width:20px;height:20px;"></i> Histórico de Pedidos</h2>
+        <div id="pedidosLista"></div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tab-config">
+      <div class="card">
+        <h2 class="card-title"><i data-lucide="settings" style="width:20px;height:20px;"></i> Configurações</h2>
+        <div class="form-group">
+          <label>Token GitHub</label>
+          <input type="password" id="githubToken" placeholder="Seu token pessoal" value="">
+        </div>
+        <div class="form-group">
+          <label>Repositório (user/repo)</label>
+          <input type="text" id="githubRepo" placeholder="ex: meuuser/meurepo" value="">
+        </div>
+        <div class="form-group">
+          <label>Arquivo JSON (caminho)</label>
+          <input type="text" id="githubFile" placeholder="data.json" value="data.json">
+        </div>
+        <button class="btn btn-primary w-full" onclick="salvarConfig()">Salvar Configuração</button>
+        <button class="btn btn-success w-full mt-2" onclick="importarDeGitHub(true)">Baixar dados do GitHub</button>
+        <button class="btn btn-secondary w-full mt-2" onclick="syncWithGitHub()">Subir dados para GitHub</button>
+      </div>
+    </div>
   </div>
 
-  <!-- Content -->
-  <div id="content" class="p-4 pb-20">
-    <!-- Dynamic content based on active tab -->
-  </div>
+  <nav class="bottom-nav" id="bottomNav">
+    <div class="nav-item active" data-tab="consumo" onclick="ativarAba('consumo')">
+      <i data-lucide="coffee"></i>
+      <span>Consumo</span>
+    </div>
+    <div class="nav-item" data-tab="credito" onclick="ativarAba('credito')">
+      <i data-lucide="wallet"></i>
+      <span>Crédito</span>
+    </div>
+    <div class="nav-item" data-tab="clientes" onclick="ativarAba('clientes')">
+      <i data-lucide="users"></i>
+      <span>Clientes</span>
+    </div>
+    <div class="nav-item" data-tab="produtos" onclick="ativarAba('produtos')">
+      <i data-lucide="package"></i>
+      <span>Produtos</span>
+    </div>
+    <div class="nav-item" data-tab="pedidos" onclick="ativarAba('pedidos')">
+      <i data-lucide="history"></i>
+      <span>Pedidos</span>
+    </div>
+    <div class="nav-item" data-tab="config" onclick="ativarAba('config')">
+      <i data-lucide="settings"></i>
+      <span>Config</span>
+    </div>
+  </nav>
 
-  <!-- Bottom Bar -->
-  <div class="bottom-bar">
-    <button class="tab-btn active" data-tab="consumo"><i class="fas fa-shopping-cart"></i> Consumo</button>
-    <button class="tab-btn" data-tab="credito"><i class="fas fa-credit-card"></i> Crédito</button>
-    <button class="tab-btn" data-tab="clientes"><i class="fas fa-users"></i> Clientes</button>
-    <button class="tab-btn" data-tab="produtos"><i class="fas fa-box"></i> Produtos</button>
-    <button class="tab-btn" data-tab="config"><i class="fas fa-cog"></i> Config</button>
+  <div id="modalOverlay" class="modal-overlay" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-title">
+        <span id="modalTitle"></span>
+        <button class="close-btn" onclick="fecharModal()">&times;</button>
+      </div>
+      <div id="modalBody"></div>
+    </div>
   </div>
 
   <script>
-    // DATABASE structure
-    let DATABASE = {
+    // ========== DATABASE ==========
+    let DB = {
       clients: [],
       products: [],
       orders: []
     };
 
-    let activeTab = 'consumo';
-    let isSyncing = false;
-    let githubConfig = JSON.parse(localStorage.getItem('githubConfig')) || { token: '', repo: '', branch: 'main', path: 'data.json' };
+    // ========== GITHUB CONFIG ==========
+    let config = {
+      token: '',
+      repo: '',
+      file: 'data.json'
+    };
 
-    // --- GitHub Sync Functions ---
-    async function fetchFromGitHub() {
-      if (!githubConfig.token || !githubConfig.repo) return null;
-      const url = `https://api.github.com/repos/${githubConfig.repo}/contents/${githubConfig.path}?ref=${githubConfig.branch}`;
-      try {
-        const res = await fetch(url, {
-          headers: { 'Authorization': 'token ' + githubConfig.token } // Note: 'token' not 'Bearer'
-        });
-        if (res.ok) {
-          const data = await res.json();
-          const content = atob(data.content);
-          const parsed = JSON.parse(content);
-          return { sha: data.sha, data: parsed };
-        }
-        return null;
-      } catch (e) {
-        console.error('GitHub fetch error:', e);
-        return null;
-      }
-    }
+    // ========== ESTADO CONSUMO ==========
+    let consumoState = {
+      selectedClient: null,
+      carrinho: []
+    };
 
-    async function pushToGitHub(sha) {
-      if (!githubConfig.token || !githubConfig.repo) return false;
-      const url = `https://api.github.com/repos/${githubConfig.repo}/contents/${githubConfig.path}`;
-      const content = btoa(JSON.stringify(DATABASE, null, 2));
-      const body = {
-        message: 'Atualização automática Caderninho Digital Pro',
-        content: content,
-        branch: githubConfig.branch,
-        sha: sha
-      };
-      try {
-        const res = await fetch(url, {
-          method: 'PUT',
-          headers: { 
-            'Authorization': 'token ' + githubConfig.token,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(body)
-        });
-        return res.ok;
-      } catch (e) {
-        console.error('GitHub push error:', e);
-        return false;
-      }
-    }
-
-    async function syncToGitHub() {
-      if (isSyncing) return;
-      isSyncing = true;
-      disableButtons(true);
-      showToast('Sincronizando com GitHub...', true);
-      try {
-        const remote = await fetchFromGitHub();
-        let sha = remote ? remote.sha : null;
-        const ok = await pushToGitHub(sha);
-        if (ok) {
-          showToast('Sincronizado com sucesso!', true);
-        } else {
-          showToast('Falha na sincronização!', false);
-        }
-      } catch (e) {
-        showToast('Erro ao sincronizar!', false);
-      }
-      isSyncing = false;
-      disableButtons(false);
-    }
-
-    // --- Toast ---
-    function showToast(message, isSuccess) {
+    // ========== TOAST ==========
+    function showToast(message, type = 'info') {
       const toast = document.getElementById('toast');
       toast.textContent = message;
-      toast.style.background = isSuccess ? '#065f46' : '#991b1b';
-      toast.style.display = 'block';
-      setTimeout(() => { toast.style.display = 'none'; }, 3000);
+      toast.className = 'toast show ' + type;
+      setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
-    function disableButtons(disabled) {
-      document.querySelectorAll('button').forEach(b => b.disabled = disabled);
+    // ========== ESCAPE HTML ==========
+    function escapeHTML(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
     }
 
-    // --- Load Data ---
-    async function loadData() {
-      // Try GitHub first
-      const remote = await fetchFromGitHub();
-      if (remote && remote.data) {
-        DATABASE = remote.data;
-        localStorage.setItem('DATABASE', JSON.stringify(DATABASE));
-        showToast('Dados carregados do GitHub', true);
-      } else {
-        const local = localStorage.getItem('DATABASE');
-        if (local) {
-          DATABASE = JSON.parse(local);
-          showToast('Dados carregados do localStorage', false);
-        } else {
-          // Initialize with empty structure
-          DATABASE = { clients: [], products: [], orders: [] };
-          localStorage.setItem('DATABASE', JSON.stringify(DATABASE));
-          showToast('Banco de dados inicializado', false);
-        }
-      }
-      renderTab(activeTab);
-    }
-
-    // --- Save to localStorage and sync ---
-    function saveData() {
-      localStorage.setItem('DATABASE', JSON.stringify(DATABASE));
-      syncToGitHub(); // automatic sync
-    }
-
-    // --- Tab Rendering ---
-    function renderTab(tab) {
-      activeTab = tab;
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.tab === tab);
-      });
-      const content = document.getElementById('content');
-      switch(tab) {
-        case 'consumo': renderConsumo(content); break;
-        case 'credito': renderCredito(content); break;
-        case 'clientes': renderClientes(content); break;
-        case 'produtos': renderProdutos(content); break;
-        case 'config': renderConfig(content); break;
-      }
-    }
-
-    // --- Individual Tab Render Functions ---
-    function renderConsumo(container) {
-      container.innerHTML = `
-        <div class="mb-4">
-          <button class="btn-success" onclick="openConsumoModal()">Novo Consumo</button>
-        </div>
-        <div id="consumoList"></div>
-      `;
-      renderConsumoList();
-    }
-
-    function renderConsumoList() {
-      const list = document.getElementById('consumoList');
-      let html = '<table class="table-custom"><thead><tr><th>Produto</th><th>Qtd</th><th>Cliente</th><th>Data</th><th>Ações</th></tr></thead><tbody>';
-      // Assuming orders are consumo entries, we need to display them. For simplicity, we'll treat orders as consumos.
-      // But original probably has separate consumos? We'll use orders.
-      DATABASE.orders.forEach((order, index) => {
-        html += `<tr>
-          <td>${order.productName || 'N/A'}</td>
-          <td>${order.quantity || 0}</td>
-          <td>${order.clientName || 'N/A'}</td>
-          <td>${new Date(order.date).toLocaleDateString()}</td>
-          <td><button class="btn-danger" onclick="deleteOrder(${index})">Excluir</button></td>
-        </tr>`;
-      });
-      html += '</tbody></table>';
-      list.innerHTML = html || '<p>Nenhum consumo registrado.</p>';
-    }
-
-    function renderCredito(container) {
-      // Simplified credit view
-      container.innerHTML = `
-        <div class="card">
-          <h2 class="text-amber-400 text-lg font-bold mb-2">Crédito dos Clientes</h2>
-          <table class="table-custom">
-            <thead><tr><th>Cliente</th><th>Saldo</th></tr></thead>
-            <tbody>
-              ${DATABASE.clients.map(c => `<tr><td>${c.name}</td><td>R$ ${(c.credit || 0).toFixed(2)}</td></tr>`).join('')}
-            </tbody>
-          </table>
-        </div>
-        <div class="mt-4">
-          <button class="btn-primary" onclick="openAddCreditModal()">Adicionar Crédito</button>
-        </div>
-      `;
-    }
-
-    function renderClientes(container) {
-      container.innerHTML = `
-        <div class="mb-4">
-          <button class="btn-success" onclick="openClientModal()">Novo Cliente</button>
-        </div>
-        <div id="clientList"></div>
-      `;
-      renderClientList();
-    }
-
-    function renderClientList() {
-      const list = document.getElementById('clientList');
-      let html = '<table class="table-custom"><thead><tr><th>Nome</th><th>Telefone</th><th>Crédito</th><th>Ações</th></tr></thead><tbody>';
-      DATABASE.clients.forEach((c, i) => {
-        html += `<tr>
-          <td>${c.name}</td>
-          <td>${c.phone || ''}</td>
-          <td>R$ ${(c.credit || 0).toFixed(2)}</td>
-          <td><button class="btn-danger" onclick="deleteClient(${i})">Excluir</button></td>
-        </tr>`;
-      });
-      html += '</tbody></table>';
-      list.innerHTML = html || '<p>Nenhum cliente cadastrado.</p>';
-    }
-
-    function renderProdutos(container) {
-      container.innerHTML = `
-        <div class="mb-4">
-          <button class="btn-success" onclick="openProductModal()">Novo Produto</button>
-        </div>
-        <div id="productList"></div>
-      `;
-      renderProductList();
-    }
-
-    function renderProductList() {
-      const list = document.getElementById('productList');
-      let html = '<table class="table-custom"><thead><tr><th>Nome</th><th>Preço</th><th>Ações</th></tr></thead><tbody>';
-      DATABASE.products.forEach((p, i) => {
-        html += `<tr>
-          <td>${p.name}</td>
-          <td>R$ ${(p.price || 0).toFixed(2)}</td>
-          <td><button class="btn-danger" onclick="deleteProduct(${i})">Excluir</button></td>
-        </tr>`;
-      });
-      html += '</tbody></table>';
-      list.innerHTML = html || '<p>Nenhum produto cadastrado.</p>';
-    }
-
-    function renderConfig(container) {
-      container.innerHTML = `
-        <div class="card">
-          <h2 class="text-amber-400 text-lg font-bold mb-2">Configuração GitHub</h2>
-          <div class="mb-2">
-            <label>Token:</label>
-            <input type="password" id="githubToken" class="input-custom" value="${githubConfig.token || ''}" placeholder="Seu token pessoal">
-          </div>
-          <div class="mb-2">
-            <label>Repositório (ex: usuario/repo):</label>
-            <input type="text" id="githubRepo" class="input-custom" value="${githubConfig.repo || ''}" placeholder="usuario/repositorio">
-          </div>
-          <div class="mb-2">
-            <label>Branch:</label>
-            <input type="text" id="githubBranch" class="input-custom" value="${githubConfig.branch || 'main'}" placeholder="main">
-          </div>
-          <div class="mb-2">
-            <label>Caminho do arquivo:</label>
-            <input type="text" id="githubPath" class="input-custom" value="${githubConfig.path || 'data.json'}" placeholder="data.json">
-          </div>
-          <button class="btn-primary" onclick="saveConfig()">Salvar Configuração</button>
-          <button class="btn-success mt-2" onclick="forceSync()">Forçar Sincronização</button>
-        </div>
-      `;
-    }
-
-    // --- CRUD Operations ---
-    function openConsumoModal() {
-      // Simplified modal for adding consumption (order)
-      const modal = document.createElement('div');
-      modal.className = 'modal';
-      modal.innerHTML = `
-        <div class="modal-content">
-          <h2 class="text-amber-400 text-xl mb-4">Novo Consumo</h2>
-          <div class="mb-2">
-            <label>Cliente:</label>
-            <select id="modalClient" class="input-custom">
-              ${DATABASE.clients.map(c => `<option value="${c.name}">${c.name}</option>`).join('')}
-            </select>
-          </div>
-          <div class="mb-2">
-            <label>Produto:</label>
-            <select id="modalProduct" class="input-custom">
-              ${DATABASE.products.map(p => `<option value="${p.name}">${p.name} - R$ ${p.price.toFixed(2)}</option>`).join('')}
-            </select>
-          </div>
-          <div class="mb-2">
-            <label>Quantidade:</label>
-            <input type="number" id="modalQty" class="input-custom" value="1" min="1">
-          </div>
-          <div class="flex justify-end space-x-2">
-            <button class="btn-primary" onclick="addConsumo()">Adicionar</button>
-            <button class="btn-danger" onclick="this.closest('.modal').remove()">Cancelar</button>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(modal);
-      window.currentModal = modal;
-    }
-
-    function addConsumo() {
-      const client = document.getElementById('modalClient').value;
-      const productName = document.getElementById('modalProduct').value;
-      const qty = parseInt(document.getElementById('modalQty').value) || 1;
-      const product = DATABASE.products.find(p => p.name === productName);
-      if (!product) { alert('Produto não encontrado'); return; }
-      const order = {
-        clientName: client,
-        productName: productName,
-        quantity: qty,
-        total: product.price * qty,
-        date: new Date().toISOString()
-      };
-      DATABASE.orders.push(order);
-      // Update client credit (debit)
-      const clientObj = DATABASE.clients.find(c => c.name === client);
-      if (clientObj) {
-        clientObj.credit = (clientObj.credit || 0) - order.total;
-      }
-      saveData();
-      document.getElementById('toast').textContent = 'Consumo adicionado!';
-      document.getElementById('toast').style.display = 'block';
-      setTimeout(() => document.getElementById('toast').style.display = 'none', 2000);
-      window.currentModal.remove();
-      renderConsumoList();
-      renderCredito(document.getElementById('content'));
-    }
-
-    function deleteOrder(index) {
-      if (!confirm('Excluir este consumo?')) return;
-      const order = DATABASE.orders[index];
-      // Restore credit
-      const clientObj = DATABASE.clients.find(c => c.name === order.clientName);
-      if (clientObj) {
-        clientObj.credit = (clientObj.credit || 0) + order.total;
-      }
-      DATABASE.orders.splice(index, 1);
-      saveData();
-      renderConsumoList();
-      renderCredito(document.getElementById('content'));
-    }
-
-    function openClientModal() {
-      const modal = document.createElement('div');
-      modal.className = 'modal';
-      modal.innerHTML = `
-        <div class="modal-content">
-          <h2 class="text-amber-400 text-xl mb-4">Novo Cliente</h2>
-          <div class="mb-2">
-            <label>Nome:</label>
-            <input type="text" id="clientName" class="input-custom" placeholder="Nome do cliente">
-          </div>
-          <div class="mb-2">
-            <label>Telefone:</label>
-            <input type="text" id="clientPhone" class="input-custom" placeholder="Telefone">
-          </div>
-          <div class="flex justify-end space-x-2">
-            <button class="btn-primary" onclick="addClient()">Adicionar</button>
-            <button class="btn-danger" onclick="this.closest('.modal').remove()">Cancelar</button>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(modal);
-      window.currentModal = modal;
-    }
-
-    function addClient() {
-      const name = document.getElementById('clientName').value.trim();
-      if (!name) { alert('Nome obrigatório'); return; }
-      const phone = document.getElementById('clientPhone').value.trim();
-      DATABASE.clients.push({ name, phone, credit: 0 });
-      saveData();
-      document.getElementById('toast').textContent = 'Cliente adicionado!';
-      document.getElementById('toast').style.display = 'block';
-      setTimeout(() => document.getElementById('toast').style.display = 'none', 2000);
-      window.currentModal.remove();
-      renderClientList();
-    }
-
-    function deleteClient(index) {
-      if (!confirm('Excluir cliente?')) return;
-      DATABASE.clients.splice(index, 1);
-      saveData();
-      renderClientList();
-    }
-
-    function openProductModal() {
-      const modal = document.createElement('div');
-      modal.className = 'modal';
-      modal.innerHTML = `
-        <div class="modal-content">
-          <h2 class="text-amber-400 text-xl mb-4">Novo Produto</h2>
-          <div class="mb-2">
-            <label>Nome:</label>
-            <input type="text" id="productName" class="input-custom" placeholder="Nome do produto">
-          </div>
-          <div class="mb-2">
-            <label>Preço:</label>
-            <input type="number" step="0.01" id="productPrice" class="input-custom" placeholder="0.00">
-          </div>
-          <div class="flex justify-end space-x-2">
-            <button class="btn-primary" onclick="addProduct()">Adicionar</button>
-            <button class="btn-danger" onclick="this.closest('.modal').remove()">Cancelar</button>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(modal);
-      window.currentModal = modal;
-    }
-
-    function addProduct() {
-      const name = document.getElementById('productName').value.trim();
-      const price = parseFloat(document.getElementById('productPrice').value);
-      if (!name || isNaN(price)) { alert('Dados inválidos'); return; }
-      DATABASE.products.push({ name, price });
-      saveData();
-      document.getElementById('toast').textContent = 'Produto adicionado!';
-      document.getElementById('toast').style.display = 'block';
-      setTimeout(() => document.getElementById('toast').style.display = 'none', 2000);
-      window.currentModal.remove();
-      renderProductList();
-    }
-
-    function deleteProduct(index) {
-      if (!confirm('Excluir produto?')) return;
-      DATABASE.products.splice(index, 1);
-      saveData();
-      renderProductList();
-    }
-
-    // --- Config Functions ---
-    function saveConfig() {
-      const token = document.getElementById('githubToken').value.trim();
-      const repo = document.getElementById('githubRepo').value.trim();
-      const branch = document.getElementById('githubBranch').value.trim() || 'main';
-      const path = document.getElementById('githubPath').value.trim() || 'data.json';
-      githubConfig = { token, repo, branch, path };
-      localStorage.setItem('githubConfig', JSON.stringify(githubConfig));
-      alert('Configuração salva!');
-      // Optionally trigger sync
-    }
-
-    async function forceSync() {
-      await syncToGitHub();
-    }
-
-    // --- Event Listeners ---
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', function() {
-        renderTab(this.dataset.tab);
-      });
+    // ========== INICIALIZAÇÃO ==========
+    document.addEventListener('DOMContentLoaded', async function() {
+      carregarConfig();
+      // Tenta puxar do GitHub na inicialização de forma silenciosa.
+      // Se falhar ou não tiver configurado, ele cai de volta para o LocalStorage automaticamente.
+      await carregarDados();
+      lucide.createIcons();
     });
 
-    // --- Initial Load ---
-    window.addEventListener('DOMContentLoaded', loadData);
+    // ========== NAVEGAÇÃO ABAS ==========
+    function activarAba(aba) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.getElementById('tab-' + aba).classList.add('active');
+      
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      document.querySelector(`.nav-item[data-tab="${aba}"]`).classList.add('active');
+      if (aba === 'pedidos') renderizarPedidos();
+      if (aba === 'consumo') renderizarClientesConsumo();
+      if (aba === 'credito') renderizarClientesCredito();
+      if (aba === 'clientes') renderizarClientes();
+      if (aba === 'produtos') renderizarProdutos();
+      lucide.createIcons();
+    }
+
+    // ========== GITHUB SYNC ==========
+    function setSyncStatus(syncing, labelText = 'Sincronizado') {
+      const indicator = document.getElementById('syncIndicator');
+      const label = document.getElementById('syncLabel');
+      if (syncing) {
+        indicator.classList.add('syncing');
+        label.textContent = labelText;
+      } else {
+        indicator.classList.remove('syncing');
+        label.textContent = labelText;
+      }
+    }
+
+    // NOVA FUNÇÃO: Busca os dados existentes do JSON do GitHub para não sobrescrever do zero
+    async function importarDeGitHub(notificarSucesso = false) {
+      if (!config.token || !config.repo) {
+        if (notificarSucesso) showToast('Configure GitHub nas Configurações', 'error');
+        return false;
+      }
+
+      setSyncStatus(true, 'Bixando dados...');
+      try {
+        const url = `https://api.github.com/repos/${config.repo}/contents/${config.file}`;
+        const headers = {
+          'Authorization': 'token ' + config.token,
+          'Accept': 'application/vnd.github.v3+json'
+        };
+
+        const res = await fetch(url, { headers });
+        if (res.ok) {
+          const data = await res.json();
+          // Decodifica o Base64 vindo do GitHub tratando caracteres especiais (UTF-8)
+          const decodedContent = decodeURIComponent(escape(atob(data.content)));
+          const parsed = JSON.parse(decodedContent);
+
+          if (parsed) {
+            DB.clients = parsed.clients || [];
+            DB.products = parsed.products || [];
+            DB.orders = parsed.orders || [];
+            
+            // Salva também localmente para garantir o backup local atualizado
+            localStorage.setItem('caderninhoDB', JSON.stringify(DB));
+            renderizarTudo();
+            
+            if (notificarSucesso) showToast('Dados importados do GitHub com sucesso!', 'success');
+            setSyncStatus(false, 'Sincronizado');
+            return true;
+          }
+        } else if (res.status === 404) {
+          if (notificarSucesso) showToast('Arquivo JSON não encontrado. Ele será criado no primeiro envio.', 'info');
+        } else {
+          if (notificarSucesso) showToast('Erro ao baixar dados do GitHub.', 'error');
+        }
+      } catch (err) {
+        console.error(err);
+        if (notificarSucesso) showToast('Falha na conexão com GitHub: ' + err.message, 'error');
+      }
+      setSyncStatus(false, 'Erro na Sinc.');
+      return false;
+    }
+
+    async function syncWithGitHub() {
+      if (!config.token || !config.repo) {
+        showToast('Configure GitHub nas Configurações', 'error');
+        return;
+      }
+      setSyncStatus(true, 'Enviando dados...');
+      try {
+        const url = `https://api.github.com/repos/${config.repo}/contents/${config.file}`;
+        const headers = {
+          'Authorization': 'token ' + config.token,
+          'Accept': 'application/vnd.github.v3+json'
+        };
+
+        // Buscar SHA atual para permitir a atualização do arquivo existente
+        let sha = null;
+        try {
+          const getRes = await fetch(url, { headers });
+          if (getRes.ok) {
+            const getData = await getRes.json();
+            sha = getData.sha;
+          }
+        } catch (e) { }
+
+        const content = btoa(unescape(encodeURIComponent(JSON.stringify(DB, null, 2))));
+        const body = {
+          message: 'Atualização Caderninho Digital Pro',
+          content: content
+        };
+        if (sha) body.sha = sha;
+
+        const putRes = await fetch(url, {
+          method: 'PUT',
+          headers: headers,
+          body: JSON.stringify(body)
+        });
+
+        if (!putRes.ok) {
+          const err = await putRes.json();
+          throw new Error(err.message || 'Erro ao sincronizar');
+        }
+        showToast('Dados salvos no GitHub com sucesso!', 'success');
+        setSyncStatus(false, 'Sincronizado');
+      } catch (err) {
+        showToast('Erro ao salvar no GitHub: ' + err.message, 'error');
+        setSyncStatus(false, 'Erro na Sinc.');
+      }
+    }
+
+    // ========== CONFIG ==========
+    function carregarConfig() {
+      try {
+        const saved = localStorage.getItem('caderninhoConfig');
+        if (saved) {
+          config = JSON.parse(saved);
+          document.getElementById('githubToken').value = config.token || '';
+          document.getElementById('githubRepo').value = config.repo || '';
+          document.getElementById('githubFile').value = config.file || 'data.json';
+        }
+      } catch (e) {}
+    }
+
+    function salvarConfig() {
+      config.token = document.getElementById('githubToken').value;
+      config.repo = document.getElementById('githubRepo').value;
+      config.file = document.getElementById('githubFile').value || 'data.json';
+      localStorage.setItem('caderninhoConfig', JSON.stringify(config));
+      showToast('Configuração salva!', 'success');
+    }
+
+    // ========== DADOS ==========
+    async function carregarDados() {
+      // 1. Primeiro tenta trazer as informações atualizadas do GitHub
+      const carregouDoGithub = await importarDeGitHub(false);
+
+      // 2. Se não conseguiu carregar do GitHub (ou não configurado), usa o LocalStorage
+      if (!carregouDoGithub) {
+        try {
+          const saved = localStorage.getItem('caderninhoDB');
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            if (parsed.clients) DB.clients = parsed.clients;
+            if (parsed.products) DB.products = parsed.products;
+            if (parsed.orders) DB.orders = parsed.orders;
+            showToast('Dados carregados localmente.', 'info');
+          }
+        } catch (e) {}
+      }
+      renderizarTudo();
+    }
+
+    function salvarDados() {
+      localStorage.setItem('caderninhoDB', JSON.stringify(DB));
+      renderizarTudo();
+      // Opcional: Descomente a linha abaixo se quiser que SALVE no GitHub automaticamente a cada clique
+      // syncWithGitHub(); 
+    }
+
+    function renderizarTudo() {
+      renderizarClientesConsumo();
+      renderizarClientesCredito();
+      renderizarClientes();
+      renderizarProdutos();
+      renderizarPedidos();
+      lucide.createIcons();
+    }
+
+    // ========== CLIENTES ==========
+    function renderizarClientes() {
+      const search = document.getElementById('clienteSearch').value.toLowerCase();
+      const lista = document.getElementById('clienteLista');
+      const filtered = DB.clients.filter(c => c.name.toLowerCase().includes(search));
+      if (filtered.length === 0) {
+        lista.innerHTML = '<p class="text-muted text-center">Nenhum cliente encontrado.</p>';
+        return;
+      }
+      lista.innerHTML = filtered.map(c => `
+        <div class="list-item">
+          <div class="info">
+            <strong>${escapeHTML(c.name)}</strong>
+            <div class="text-xs text-muted">Saldo: R$ ${c.balance.toFixed(2)}</div>
+          </div>
+          <div class="actions">
+            <button class="btn btn-sm btn-secondary" onclick="editarCliente('${c.id}')">
+              <i data-lucide="pencil" style="width:14px;height:14px;"></i>
+            </button>
+            <button class="btn btn-sm btn-danger" onclick="excluirCliente('${c.id}')">
+              <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
+            </button>
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function abrirModalCliente(cliente = null) {
+      const overlay = document.getElementById('modalOverlay');
+      const title = document.getElementById('modalTitle');
+      const body = document.getElementById('modalBody');
+      overlay.style.display = 'flex';
+      if (cliente) {
+        title.textContent = 'Editar Cliente';
+        body.innerHTML = `
+          <div class="form-group">
+            <label>Nome</label>
+            <input type="text" id="clienteNomeModal" value="${escapeHTML(cliente.name)}">
+          </div>
+          <div class="form-group">
+            <label>Saldo Inicial (R$)</label>
+            <input type="number" id="clienteSaldoModal" step="0.01" value="${cliente.balance}">
+          </div>
+          <button class="btn btn-primary w-full mt-2" onclick="salvarCliente('${cliente.id}')">Salvar</button>
+        `;
+      } else {
+        title.textContent = 'Novo Cliente';
+        body.innerHTML = `
+          <div class="form-group">
+            <label>Nome</label>
+            <input type="text" id="clienteNomeModal" placeholder="Nome do cliente">
+          </div>
+          <div class="form-group">
+            <label>Saldo Inicial (R$)</label>
+            <input type="number" id="clienteSaldoModal" step="0.01" value="0">
+          </div>
+          <button class="btn btn-primary w-full mt-2" onclick="salvarCliente()">Salvar</button>
+        `;
+      }
+    }
+
+    function salvarCliente(id = null) {
+      const nome = document.getElementById('clienteNomeModal').value.trim();
+      const saldo = parseFloat(document.getElementById('clienteSaldoModal').value);
+      if (!nome) {
+        showToast('Nome do cliente é obrigatório.', 'error');
+        return;
+      }
+      if (isNaN(saldo)) {
+        showToast('Saldo inválido.', 'error');
+        return;
+      }
+      if (id) {
+        const idx = DB.clients.findIndex(c => c.id === id);
+        if (idx !== -1) {
+          DB.clients[idx].name = nome;
+          DB.clients[idx].balance = saldo;
+        }
+      } else {
+        const newId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+        DB.clients.push({ id: newId, name: nome, balance: saldo });
+      }
+      salvarDados();
+      fecharModal();
+      showToast(id ? 'Cliente atualizado!' : 'Cliente criado!', 'success');
+    }
+
+    function editarCliente(id) {
+      const cliente = DB.clients.find(c => c.id === id);
+      if (cliente) abrirModalCliente(cliente);
+    }
+
+    function excluirCliente(id) {
+      if (!confirm('Tem certeza que deseja excluir este cliente?')) return;
+      DB.clients = DB.clients.filter(c => c.id !== id);
+      salvarDados();
+      showToast('Cliente excluído.', 'success');
+    }
+
+    // ========== PRODUTOS ==========
+    function renderizarProdutos() {
+      const search = document.getElementById('produtoSearch').value.toLowerCase();
+      const lista = document.getElementById('produtoLista');
+      const filtered = DB.products.filter(p => p.name.toLowerCase().includes(search));
+      if (filtered.length === 0) {
+        lista.innerHTML = '<p class="text-muted text-center">Nenhum produto encontrado.</p>';
+        return;
+      }
+      lista.innerHTML = filtered.map(p => `
+        <div class="list-item">
+          <div class="info">
+            <strong>${escapeHTML(p.name)}</strong>
+            <div class="text-xs text-muted">R$ ${p.price.toFixed(2)}</div>
+          </div>
+          <div class="actions">
+            <button class="btn btn-sm btn-secondary" onclick="editarProduto('${p.id}')">
+              <i data-lucide="pencil" style="width:14px;height:14px;"></i>
+            </button>
+            <button class="btn btn-sm btn-danger" onclick="excluirProduto('${p.id}')">
+              <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
+            </button>
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function abrirModalProduto(produto = null) {
+      const overlay = document.getElementById('modalOverlay');
+      const title = document.getElementById('modalTitle');
+      const body = document.getElementById('modalBody');
+      overlay.style.display = 'flex';
+      if (produto) {
+        title.textContent = 'Editar Produto';
+        body.innerHTML = `
+          <div class="form-group">
+            <label>Nome</label>
+            <input type="text" id="produtoNomeModal" value="${escapeHTML(produto.name)}">
+          </div>
+          <div class="form-group">
+            <label>Preço (R$)</label>
+            <input type="number" id="produtoPrecoModal" step="0.01" min="0" value="${produto.price}">
+          </div>
+          <button class="btn btn-primary w-full mt-2" onclick="salvarProduto('${produto.id}')">Salvar</button>
+        `;
+      } else {
+        title.textContent = 'Novo Produto';
+        body.innerHTML = `
+          <div class="form-group">
+            <label>Nome</label>
+            <input type="text" id="produtoNomeModal" placeholder="Nome do produto">
+          </div>
+          <div class="form-group">
+            <label>Preço (R$)</label>
+            <input type="number" id="produtoPrecoModal" step="0.01" min="0" placeholder="0,00">
+          </div>
+          <button class="btn btn-primary w-full mt-2" onclick="salvarProduto()">Salvar</button>
+        `;
+      }
+    }
+
+    function salvarProduto(id = null) {
+      const nome = document.getElementById('produtoNomeModal').value.trim();
+      const preco = parseFloat(document.getElementById('produtoPrecoModal').value);
+      if (!nome) {
+        showToast('Nome do produto é obrigatório.', 'error');
+        return;
+      }
+      if (isNaN(preco) || preco < 0) {
+        showToast('Preço inválido.', 'error');
+        return;
+      }
+      if (id) {
+        const idx = DB.products.findIndex(p => p.id === id);
+        if (idx !== -1) {
+          DB.products[idx].name = nome;
+          DB.products[idx].price = preco;
+        }
+      } else {
+        const newId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+        DB.products.push({ id: newId, name: nome, price: preco });
+      }
+      salvarDados();
+      fecharModal();
+      atualizarSelectProdutos();
+      showToast(id ? 'Produto updated!' : 'Produto criado!', 'success');
+    }
+
+    function editarProduto(id) {
+      const produto = DB.products.find(p => p.id === id);
+      if (produto) abrirModalProduto(produto);
+    }
+
+    function excluirProduto(id) {
+      if (!confirm('Tem certeza que deseja excluir este produto?')) return;
+      DB.products = DB.products.filter(p => p.id !== id);
+      salvarDados();
+      atualizarSelectProdutos();
+      showToast('Produto excluído.', 'success');
+    }
+
+    function atualizarSelectProdutos() {
+      const select = document.getElementById('consumoProdutoSelect');
+      select.innerHTML = '<option value="">Selecione um produto</option>';
+      DB.products.forEach(p => {
+        select.innerHTML += `<option value="${p.id}">${escapeHTML(p.name)} - R$ ${p.price.toFixed(2)}</option>`;
+      });
+    }
+
+    // ========== CONSUMO ==========
+    function renderizarClientesConsumo() {
+      const search = document.getElementById('consumoClienteSearch').value.toLowerCase();
+      const lista = document.getElementById('consumoClienteList');
+      const filtered = DB.clients.filter(c => c.name.toLowerCase().includes(search));
+      if (filtered.length === 0) {
+        lista.innerHTML = '<p class="text-muted text-center">Nenhum cliente encontrado.</p>';
+        return;
+      }
+      lista.innerHTML = filtered.map(c => `
+        <div class="list-item" onclick="selecionarClienteConsumo('${c.id}')" style="cursor:pointer;">
+          <div class="info">
+            <strong>${escapeHTML(c.name)}</strong>
+            <div class="text-xs text-muted">Saldo: R$ ${c.balance.toFixed(2)}</div>
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function filtrarClientesConsumo() {
+      renderizarClientesConsumo();
+    }
+
+    function selecionarClienteConsumo(id) {
+      const cliente = DB.clients.find(c => c.id === id);
+      if (!cliente) return;
+      consumoState.selectedClient = cliente;
+      document.getElementById('consumoClienteList').style.display = 'none';
+      document.getElementById('consumoClienteSelected').style.display = 'block';
+      document.getElementById('consumoClienteNome').textContent = cliente.name;
+      document.getElementById('consumoClienteSearch').value = '';
+      atualizarSelectProdutos();
+      consumoState.carrinho = [];
+      atualizarCarrinho();
+    }
+
+    function limparClienteConsumo() {
+      consumoState.selectedClient = null;
+      consumoState.carrinho = [];
+      document.getElementById('consumoClienteList').style.display = 'block';
+      document.getElementById('consumoClienteSelected').style.display = 'none';
+      renderizarClientesConsumo();
+      atualizarCarrinho();
+    }
+
+    function addCarrinho() {
+      const prodId = document.getElementById('consumoProdutoSelect').value;
+      const qtd = parseInt(document.getElementById('consumoQtd').value) || 1;
+      if (!prodId) {
+        showToast('Selecione um produto.', 'error');
+        return;
+      }
+      if (qtd < 1 || qtd > 999) {
+        showToast('Quantidade inválida.', 'error');
+        return;
+      }
+      const produto = DB.products.find(p => p.id === prodId);
+      if (!produto) {
+        showToast('Produto não encontrado.', 'error');
+        return;
+      }
+      const existente = consumoState.carrinho.find(item => item.productId === prodId);
+      if (existente) {
+        existente.qty += qtd;
+      } else {
+        consumoState.carrinho.push({ productId: prodId, name: produto.name, price: produto.price, qty: qtd });
+      }
+      atualizarCarrinho();
+      showToast('Item adicionado!', 'success');
+    }
+
+    function atualizarCarrinho() {
+      const container = document.getElementById('carrinhoItems');
+      const totalSpan = document.getElementById('carrinhoTotal');
+      const countSpan = document.getElementById('cartItemsCount');
+      if (consumoState.carrinho.length === 0) {
+        container.innerHTML = '<p class="text-muted text-xs">Carrinho vazio.</p>';
+        totalSpan.textContent = 'Total: R$ 0,00';
+        countSpan.textContent = '0 itens';
+        return;
+      }
+      let total = 0;
+      let qtdTotal = 0;
+      container.innerHTML = consumoState.carrinho.map((item, index) => {
+        const subtotal = item.price * item.qty;
+        total += subtotal;
+        qtdTotal += item.qty;
+        return `
+          <div class="carrinho-item">
+            <div>
+              <strong class="text-sm">${escapeHTML(item.name)}</strong>
+              <div class="text-xs text-muted">R$ ${item.price.toFixed(2)} cada</div>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="qty-controls">
+                <button onclick="alterarQtdCarrinho(${index}, -1)">-</button>
+                <span>${item.qty}</span>
+                <button onclick="alterarQtdCarrinho(${index}, 1)">+</button>
+              </div>
+              <button class="btn btn-sm btn-danger" onclick="removerItemCarrinho(${index})">
+                <i data-lucide="x" style="width:14px;height:14px;"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+      totalSpan.textContent = `Total: R$ ${total.toFixed(2)}`;
+      countSpan.textContent = `${qtdTotal} itens`;
+      lucide.createIcons();
+    }
+
+    function alterarQtdCarrinho(index, delta) {
+      const item = consumoState.carrinho[index];
+      if (!item) return;
+      item.qty += delta;
+      if (item.qty < 1) item.qty = 1;
+      atualizarCarrinho();
+    }
+
+    function removerItemCarrinho(index) {
+      consumoState.carrinho.splice(index, 1);
+      atualizarCarrinho();
+    }
+
+    function confirmarPedido() {
+      if (!consumoState.selectedClient) {
+        showToast('Selecione um cliente.', 'error');
+        return;
+      }
+      if (consumoState.carrinho.length === 0) {
+        showToast('Carrinho vazio.', 'error');
+        return;
+      }
+      let totalDebito = 0;
+      const items = consumoState.carrinho.map(item => {
+        totalDebito += item.price * item.qty;
+        return { productId: item.productId, name: item.name, price: item.price, qty: item.qty };
+      });
+      const clienteIdx = DB.clients.findIndex(c => c.id === consumoState.selectedClient.id);
+      if (clienteIdx === -1) {
+        showToast('Cliente não encontrado.', 'error');
+        return;
+      }
+      DB.clients[clienteIdx].balance -= totalDebito;
+      const pedido = {
+        id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+        clientId: consumoState.selectedClient.id,
+        clientName: consumoState.selectedClient.name,
+        items: items,
+        total: totalDebito,
+        date: new Date().toISOString()
+      };
+      DB.orders.push(pedido);
+      consumoState.carrinho = [];
+      salvarDados();
+      atualizarCarrinho();
+      showToast('Pedido confirmado!', 'success');
+      document.getElementById('consumoClienteNome').textContent = DB.clients[clienteIdx].name + ' (Saldo: R$ ' + DB.clients[clienteIdx].balance.toFixed(2) + ')';
+    }
+
+    // ========== CRÉDITO/DÉBITO ==========
+    let creditoState = { selectedClient: null };
+    function renderizarClientesCredito() {
+      const search = document.getElementById('creditoClienteSearch').value.toLowerCase();
+      const lista = document.getElementById('creditoClienteList');
+      const filtered = DB.clients.filter(c => c.name.toLowerCase().includes(search));
+      if (filtered.length === 0) {
+        lista.innerHTML = '<p class="text-muted text-center">Nenhum cliente encontrado.</p>';
+        return;
+      }
+      lista.innerHTML = filtered.map(c => `
+        <div class="list-item" onclick="selecionarClienteCredito('${c.id}')" style="cursor:pointer;">
+          <div class="info">
+            <strong>${escapeHTML(c.name)}</strong>
+            <div class="text-xs text-muted">Saldo: R$ ${c.balance.toFixed(2)}</div>
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function filtrarClientesCredito() {
+      renderizarClientesCredito();
+    }
+
+    function selecionarClienteCredito(id) {
+      const cliente = DB.clients.find(c => c.id === id);
+      if (!cliente) return;
+      creditoState.selectedClient = cliente;
+      document.getElementById('creditoClienteList').style.display = 'none';
+      document.getElementById('creditoClienteSelected').style.display = 'block';
+      document.getElementById('creditoClienteNome').textContent = cliente.name;
+      document.getElementById('creditoSaldoAtual').textContent = 'Saldo: R$ ' + cliente.balance.toFixed(2);
+      document.getElementById('creditoClienteSearch').value = '';
+    }
+
+    function limparClienteCredito() {
+      creditoState.selectedClient = null;
+      document.getElementById('creditoClienteList').style.display = 'block';
+      document.getElementById('creditoClienteSelected').style.display = 'none';
+      renderizarClientesCredito();
+    }
+
+    function creditarDebitar() {
+      if (!creditoState.selectedClient) {
+        showToast('Selecione um cliente.', 'error');
+        return;
+      }
+      const tipo = document.getElementById('creditoTipo').value;
+      const valor = parseFloat(document.getElementById('creditoValor').value);
+      if (isNaN(valor) || valor <= 0) {
+        showToast('Valor inválido.', 'error');
+        return;
+      }
+      const clienteIdx = DB.clients.findIndex(c => c.id === creditoState.selectedClient.id);
+      if (clienteIdx === -1) {
+        showToast('Cliente não encontrado.', 'error');
+        return;
+      }
+      if (tipo === 'credito') {
+        DB.clients[clienteIdx].balance += valor;
+      } else {
+        DB.clients[clienteIdx].balance -= valor;
+      }
+      salvarDados();
+      creditoState.selectedClient = DB.clients[clienteIdx];
+      document.getElementById('creditoSaldoAtual').textContent = 'Saldo: R$ ' + DB.clients[clienteIdx].balance.toFixed(2);
+      document.getElementById('creditoValor').value = '';
+      showToast('Operação realizada!', 'success');
+    }
+
+    // ========== PEDIDOS ==========
+    function renderizarPedidos() {
+      const lista = document.getElementById('pedidosLista');
+      if (DB.orders.length === 0) {
+        lista.innerHTML = '<p class="text-muted text-center">Nenhum pedido registrado.</p>';
+        return;
+      }
+      const sorted = [...DB.orders].reverse();
+      lista.innerHTML = sorted.map(pedido => `
+        <div class="card" style="padding:12px; margin-bottom:8px;">
+          <div class="flex items-center justify-between">
+            <strong>${escapeHTML(pedido.clientName)}</strong>
+            <span class="badge emerald">R$ ${pedido.total.toFixed(2)}</span>
+          </div>
+          <div class="text-xs text-muted mt-1">${new Date(pedido.date).toLocaleString('pt-BR')}</div>
+          <div class="text-xs mt-1">
+            ${pedido.items.map(item => `${escapeHTML(item.name)} x${item.qty} (R$ ${(item.price * item.qty).toFixed(2)})`).join('<br>')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ========== MODAL ==========
+    function fecharModal() {
+      document.getElementById('modalOverlay').style.display = 'none';
+    }
+
+    document.getElementById('modalOverlay').addEventListener('click', function(e) {
+      if (e.target === this) fecharModal();
+    });
+
+    console.log('Caderninho Digital Pro carregado com sincronização reversa!');
   </script>
 </body>
 </html>
