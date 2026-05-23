@@ -1,64 +1,11 @@
 {
   "clients": [
     {
-      "id": "mpiw592ke719t",
-      "name": "Ernesto Niklaus (Benjamin)",
-      "balance": 30
-    },
-    {
-      "id": "mpiw5jvws24k2",
-      "name": "Erywan Freitas",
-      "balance": 50
-    },
-    {
-      "id": "mpiw5quceuq27",
-      "name": "Ana Froes",
+      "id": "mpiwqc0naiq1w",
+      "name": "Benjamin Niklaus",
       "balance": 100
-    },
-    {
-      "id": "mpiw5y3ss8vr1",
-      "name": "Aline Bueno",
-      "balance": 10
     }
   ],
-  "products": [
-    {
-      "id": "mpiw67kan5x3t",
-      "name": "Suco",
-      "price": 10
-    },
-    {
-      "id": "mpiw6dvs6gmeb",
-      "name": "Salgado",
-      "price": 10
-    },
-    {
-      "id": "mpiw6jh9vctso",
-      "name": "Bala",
-      "price": 2
-    }
-  ],
-  "orders": [
-    {
-      "id": "mpiw6tc8kc4s5",
-      "clientId": "mpiw592ke719t",
-      "clientName": "Ernesto Niklaus (Benjamin)",
-      "items": [
-        {
-          "productId": "mpiw67kan5x3t",
-          "name": "Suco",
-          "price": 10,
-          "qty": 1
-        },
-        {
-          "productId": "mpiw6dvs6gmeb",
-          "name": "Salgado",
-          "price": 10,
-          "qty": 1
-        }
-      ],
-      "total": 20,
-      "date": "2026-05-23T22:00:25.352Z"
-    }
-  ]
+  "products": [],
+  "orders": []
 }
