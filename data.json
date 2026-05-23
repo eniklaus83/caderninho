@@ -39,6 +39,11 @@
       "id": "mpiz22tgaqv83",
       "name": "Edgar Rodrigues",
       "balance": 50
+    },
+    {
+      "id": "mpiz7pv2p6wsf",
+      "name": "Rodrigo Rotiroti",
+      "balance": 50
     }
   ],
   "products": [
@@ -126,6 +131,11 @@
       "id": "mpiysw3cm9ouq",
       "name": "Pastel de Carne",
       "price": 10
+    },
+    {
+      "id": "mpiz8j4t2fm30",
+      "name": "Dadinho",
+      "price": 0.5
     }
   ],
   "orders": [
