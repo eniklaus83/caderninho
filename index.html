@@ -195,7 +195,8 @@
       statusEl.innerText = "🔌 SINCRONIZANDO...";
       statusEl.className = "text-[9px] text-amber-400 font-bold tracking-wide uppercase";
       
-      var url = "https://api.github.com/repos/" + GITHUB_CONFIG.user + "/" + GITHUB_CONFIG.repo + "/contents/dados.json";
+      var url = "https://github.com" + GITHUB_CONFIG.user + "/" + GITHUB_CONFIG.repo + "/contents/dados.json";
+
       
       try {
         var response = await fetch(url, {
