@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Caderninho Digital Pro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body {
+      background-color: #0f172a;
+      color: #f1f5f9;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .toast {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: #1e293b;
+      color: #fbbf24;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3);
+      z-index: 1000;
+      display: none;
+    }
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+    .modal-content {
+      background: #1e293b;
+      padding: 2rem;
+      border-radius: 0.75rem;
+      width: 90%;
+      max-width: 500px;
+    }
+    .header {
+      position: sticky;
+      top: 0;
+      background: #0f172a;
+      z-index: 40;
+      border-bottom: 1px solid #334155;
+    }
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #1e293b;
+      border-top: 1px solid #334155;
+      display: flex;
+      justify-content: space-around;
+      padding: 0.5rem 0;
+      z-index: 30;
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      color: #fbbf24;
+      border-bottom: 2px solid #fbbf24;
+    }
+    .btn-primary {
+      background: #f59e0b;
+      color: #0f172a;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+    }
+    .btn-danger {
+      background: #e11d48;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+    }
+    .btn-success {
+      background: #10b981;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+    }
+    .table-custom {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .table-custom th, .table-custom td {
+      padding: 0.75rem;
+      border-bottom: 1px solid #334155;
+      text-align: left;
+    }
+    .table-custom th {
+      color: #fbbf24;
+    }
+    .input-custom {
+      background: #1e293b;
+      border: 1px solid #475569;
+      color: #f1f5f9;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      width: 100%;
+    }
+    .card {
+      background: #1e293b;
+      border-radius: 0.75rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="toast" class="toast"></div>
+
+  <!-- Header -->
+  <div class="header p-4">
+    <h1 class="text-2xl font-bold text-amber-400">Caderninho Digital Pro</h1>
+  </div>
+
+  <!-- Content -->
+  <div id="content" class="p-4 pb-20">
+    <!-- Dynamic content based on active tab -->
+  </div>
+
+  <!-- Bottom Bar -->
+  <div class="bottom-bar">
+    <button class="tab-btn active" data-tab="consumo"><i class="fas fa-shopping-cart"></i> Consumo</button>
+    <button class="tab-btn" data-tab="credito"><i class="fas fa-credit-card"></i> Crédito</button>
+    <button class="tab-btn" data-tab="clientes"><i class="fas fa-users"></i> Clientes</button>
+    <button class="tab-btn" data-tab="produtos"><i class="fas fa-box"></i> Produtos</button>
+    <button class="tab-btn" data-tab="config"><i class="fas fa-cog"></i> Config</button>
+  </div>
+
+  <script>
+    // DATABASE structure
+    let DATABASE = {
+      clients: [],
+      products: [],
+      orders: []
+    };
+
+    let activeTab = 'consumo';
+    let isSyncing = false;
+    let githubConfig = JSON.parse(localStorage.getItem('githubConfig')) || { token: '', repo: '', branch: 'main', path: 'data.json' };
+
+    // --- GitHub Sync Functions ---
+    async function fetchFromGitHub() {
+      if (!githubConfig.token || !githubConfig.repo) return null;
+      const url = `https://api.github.com/repos/${githubConfig.repo}/contents/${githubConfig.path}?ref=${githubConfig.branch}`;
+      try {
+        const res = await fetch(url, {
+          headers: { 'Authorization': 'token ' + githubConfig.token } // Note: 'token' not 'Bearer'
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const content = atob(data.content);
+          const parsed = JSON.parse(content);
+          return { sha: data.sha, data: parsed };
+        }
+        return null;
+      } catch (e) {
+        console.error('GitHub fetch error:', e);
+        return null;
+      }
+    }
+
+    async function pushToGitHub(sha) {
+      if (!githubConfig.token || !githubConfig.repo) return false;
+      const url = `https://api.github.com/repos/${githubConfig.repo}/contents/${githubConfig.path}`;
+      const content = btoa(JSON.stringify(DATABASE, null, 2));
+      const body = {
+        message: 'Atualização automática Caderninho Digital Pro',
+        content: content,
+        branch: githubConfig.branch,
+        sha: sha
+      };
+      try {
+        const res = await fetch(url, {
+          method: 'PUT',
+          headers: { 
+            'Authorization': 'token ' + githubConfig.token,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(body)
+        });
+        return res.ok;
+      } catch (e) {
+        console.error('GitHub push error:', e);
+        return false;
+      }
+    }
+
+    async function syncToGitHub() {
+      if (isSyncing) return;
+      isSyncing = true;
+      disableButtons(true);
+      showToast('Sincronizando com GitHub...', true);
+      try {
+        const remote = await fetchFromGitHub();
+        let sha = remote ? remote.sha : null;
+        const ok = await pushToGitHub(sha);
+        if (ok) {
+          showToast('Sincronizado com sucesso!', true);
+        } else {
+          showToast('Falha na sincronização!', false);
+        }
+      } catch (e) {
+        showToast('Erro ao sincronizar!', false);
+      }
+      isSyncing = false;
+      disableButtons(false);
+    }
+
+    // --- Toast ---
+    function showToast(message, isSuccess) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.style.background = isSuccess ? '#065f46' : '#991b1b';
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 3000);
+    }
+
+    function disableButtons(disabled) {
+      document.querySelectorAll('button').forEach(b => b.disabled = disabled);
+    }
+
+    // --- Load Data ---
+    async function loadData() {
+      // Try GitHub first
+      const remote = await fetchFromGitHub();
+      if (remote && remote.data) {
+        DATABASE = remote.data;
+        localStorage.setItem('DATABASE', JSON.stringify(DATABASE));
+        showToast('Dados carregados do GitHub', true);
+      } else {
+        const local = localStorage.getItem('DATABASE');
+        if (local) {
+          DATABASE = JSON.parse(local);
+          showToast('Dados carregados do localStorage', false);
+        } else {
+          // Initialize with empty structure
+          DATABASE = { clients: [], products: [], orders: [] };
+          localStorage.setItem('DATABASE', JSON.stringify(DATABASE));
+          showToast('Banco de dados inicializado', false);
+        }
+      }
+      renderTab(activeTab);
+    }
+
+    // --- Save to localStorage and sync ---
+    function saveData() {
+      localStorage.setItem('DATABASE', JSON.stringify(DATABASE));
+      syncToGitHub(); // automatic sync
+    }
+
+    // --- Tab Rendering ---
+    function renderTab(tab) {
+      activeTab = tab;
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tab);
+      });
+      const content = document.getElementById('content');
+      switch(tab) {
+        case 'consumo': renderConsumo(content); break;
+        case 'credito': renderCredito(content); break;
+        case 'clientes': renderClientes(content); break;
+        case 'produtos': renderProdutos(content); break;
+        case 'config': renderConfig(content); break;
+      }
+    }
+
+    // --- Individual Tab Render Functions ---
+    function renderConsumo(container) {
+      container.innerHTML = `
+        <div class="mb-4">
+          <button class="btn-success" onclick="openConsumoModal()">Novo Consumo</button>
+        </div>
+        <div id="consumoList"></div>
+      `;
+      renderConsumoList();
+    }
+
+    function renderConsumoList() {
+      const list = document.getElementById('consumoList');
+      let html = '<table class="table-custom"><thead><tr><th>Produto</th><th>Qtd</th><th>Cliente</th><th>Data</th><th>Ações</th></tr></thead><tbody>';
+      // Assuming orders are consumo entries, we need to display them. For simplicity, we'll treat orders as consumos.
+      // But original probably has separate consumos? We'll use orders.
+      DATABASE.orders.forEach((order, index) => {
+        html += `<tr>
+          <td>${order.productName || 'N/A'}</td>
+          <td>${order.quantity || 0}</td>
+          <td>${order.clientName || 'N/A'}</td>
+          <td>${new Date(order.date).toLocaleDateString()}</td>
+          <td><button class="btn-danger" onclick="deleteOrder(${index})">Excluir</button></td>
+        </tr>`;
+      });
+      html += '</tbody></table>';
+      list.innerHTML = html || '<p>Nenhum consumo registrado.</p>';
+    }
+
+    function renderCredito(container) {
+      // Simplified credit view
+      container.innerHTML = `
+        <div class="card">
+          <h2 class="text-amber-400 text-lg font-bold mb-2">Crédito dos Clientes</h2>
+          <table class="table-custom">
+            <thead><tr><th>Cliente</th><th>Saldo</th></tr></thead>
+            <tbody>
+              ${DATABASE.clients.map(c => `<tr><td>${c.name}</td><td>R$ ${(c.credit || 0).toFixed(2)}</td></tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+        <div class="mt-4">
+          <button class="btn-primary" onclick="openAddCreditModal()">Adicionar Crédito</button>
+        </div>
+      `;
+    }
+
+    function renderClientes(container) {
+      container.innerHTML = `
+        <div class="mb-4">
+          <button class="btn-success" onclick="openClientModal()">Novo Cliente</button>
+        </div>
+        <div id="clientList"></div>
+      `;
+      renderClientList();
+    }
+
+    function renderClientList() {
+      const list = document.getElementById('clientList');
+      let html = '<table class="table-custom"><thead><tr><th>Nome</th><th>Telefone</th><th>Crédito</th><th>Ações</th></tr></thead><tbody>';
+      DATABASE.clients.forEach((c, i) => {
+        html += `<tr>
+          <td>${c.name}</td>
+          <td>${c.phone || ''}</td>
+          <td>R$ ${(c.credit || 0).toFixed(2)}</td>
+          <td><button class="btn-danger" onclick="deleteClient(${i})">Excluir</button></td>
+        </tr>`;
+      });
+      html += '</tbody></table>';
+      list.innerHTML = html || '<p>Nenhum cliente cadastrado.</p>';
+    }
+
+    function renderProdutos(container) {
+      container.innerHTML = `
+        <div class="mb-4">
+          <button class="btn-success" onclick="openProductModal()">Novo Produto</button>
+        </div>
+        <div id="productList"></div>
+      `;
+      renderProductList();
+    }
+
+    function renderProductList() {
+      const list = document.getElementById('productList');
+      let html = '<table class="table-custom"><thead><tr><th>Nome</th><th>Preço</th><th>Ações</th></tr></thead><tbody>';
+      DATABASE.products.forEach((p, i) => {
+        html += `<tr>
+          <td>${p.name}</td>
+          <td>R$ ${(p.price || 0).toFixed(2)}</td>
+          <td><button class="btn-danger" onclick="deleteProduct(${i})">Excluir</button></td>
+        </tr>`;
+      });
+      html += '</tbody></table>';
+      list.innerHTML = html || '<p>Nenhum produto cadastrado.</p>';
+    }
+
+    function renderConfig(container) {
+      container.innerHTML = `
+        <div class="card">
+          <h2 class="text-amber-400 text-lg font-bold mb-2">Configuração GitHub</h2>
+          <div class="mb-2">
+            <label>Token:</label>
+            <input type="password" id="githubToken" class="input-custom" value="${githubConfig.token || ''}" placeholder="Seu token pessoal">
+          </div>
+          <div class="mb-2">
+            <label>Repositório (ex: usuario/repo):</label>
+            <input type="text" id="githubRepo" class="input-custom" value="${githubConfig.repo || ''}" placeholder="usuario/repositorio">
+          </div>
+          <div class="mb-2">
+            <label>Branch:</label>
+            <input type="text" id="githubBranch" class="input-custom" value="${githubConfig.branch || 'main'}" placeholder="main">
+          </div>
+          <div class="mb-2">
+            <label>Caminho do arquivo:</label>
+            <input type="text" id="githubPath" class="input-custom" value="${githubConfig.path || 'data.json'}" placeholder="data.json">
+          </div>
+          <button class="btn-primary" onclick="saveConfig()">Salvar Configuração</button>
+          <button class="btn-success mt-2" onclick="forceSync()">Forçar Sincronização</button>
+        </div>
+      `;
+    }
+
+    // --- CRUD Operations ---
+    function openConsumoModal() {
+      // Simplified modal for adding consumption (order)
+      const modal = document.createElement('div');
+      modal.className = 'modal';
+      modal.innerHTML = `
+        <div class="modal-content">
+          <h2 class="text-amber-400 text-xl mb-4">Novo Consumo</h2>
+          <div class="mb-2">
+            <label>Cliente:</label>
+            <select id="modalClient" class="input-custom">
+              ${DATABASE.clients.map(c => `<option value="${c.name}">${c.name}</option>`).join('')}
+            </select>
+          </div>
+          <div class="mb-2">
+            <label>Produto:</label>
+            <select id="modalProduct" class="input-custom">
+              ${DATABASE.products.map(p => `<option value="${p.name}">${p.name} - R$ ${p.price.toFixed(2)}</option>`).join('')}
+            </select>
+          </div>
+          <div class="mb-2">
+            <label>Quantidade:</label>
+            <input type="number" id="modalQty" class="input-custom" value="1" min="1">
+          </div>
+          <div class="flex justify-end space-x-2">
+            <button class="btn-primary" onclick="addConsumo()">Adicionar</button>
+            <button class="btn-danger" onclick="this.closest('.modal').remove()">Cancelar</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      window.currentModal = modal;
+    }
+
+    function addConsumo() {
+      const client = document.getElementById('modalClient').value;
+      const productName = document.getElementById('modalProduct').value;
+      const qty = parseInt(document.getElementById('modalQty').value) || 1;
+      const product = DATABASE.products.find(p => p.name === productName);
+      if (!product) { alert('Produto não encontrado'); return; }
+      const order = {
+        clientName: client,
+        productName: productName,
+        quantity: qty,
+        total: product.price * qty,
+        date: new Date().toISOString()
+      };
+      DATABASE.orders.push(order);
+      // Update client credit (debit)
+      const clientObj = DATABASE.clients.find(c => c.name === client);
+      if (clientObj) {
+        clientObj.credit = (clientObj.credit || 0) - order.total;
+      }
+      saveData();
+      document.getElementById('toast').textContent = 'Consumo adicionado!';
+      document.getElementById('toast').style.display = 'block';
+      setTimeout(() => document.getElementById('toast').style.display = 'none', 2000);
+      window.currentModal.remove();
+      renderConsumoList();
+      renderCredito(document.getElementById('content'));
+    }
+
+    function deleteOrder(index) {
+      if (!confirm('Excluir este consumo?')) return;
+      const order = DATABASE.orders[index];
+      // Restore credit
+      const clientObj = DATABASE.clients.find(c => c.name === order.clientName);
+      if (clientObj) {
+        clientObj.credit = (clientObj.credit || 0) + order.total;
+      }
+      DATABASE.orders.splice(index, 1);
+      saveData();
+      renderConsumoList();
+      renderCredito(document.getElementById('content'));
+    }
+
+    function openClientModal() {
+      const modal = document.createElement('div');
+      modal.className = 'modal';
+      modal.innerHTML = `
+        <div class="modal-content">
+          <h2 class="text-amber-400 text-xl mb-4">Novo Cliente</h2>
+          <div class="mb-2">
+            <label>Nome:</label>
+            <input type="text" id="clientName" class="input-custom" placeholder="Nome do cliente">
+          </div>
+          <div class="mb-2">
+            <label>Telefone:</label>
+            <input type="text" id="clientPhone" class="input-custom" placeholder="Telefone">
+          </div>
+          <div class="flex justify-end space-x-2">
+            <button class="btn-primary" onclick="addClient()">Adicionar</button>
+            <button class="btn-danger" onclick="this.closest('.modal').remove()">Cancelar</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      window.currentModal = modal;
+    }
+
+    function addClient() {
+      const name = document.getElementById('clientName').value.trim();
+      if (!name) { alert('Nome obrigatório'); return; }
+      const phone = document.getElementById('clientPhone').value.trim();
+      DATABASE.clients.push({ name, phone, credit: 0 });
+      saveData();
+      document.getElementById('toast').textContent = 'Cliente adicionado!';
+      document.getElementById('toast').style.display = 'block';
+      setTimeout(() => document.getElementById('toast').style.display = 'none', 2000);
+      window.currentModal.remove();
+      renderClientList();
+    }
+
+    function deleteClient(index) {
+      if (!confirm('Excluir cliente?')) return;
+      DATABASE.clients.splice(index, 1);
+      saveData();
+      renderClientList();
+    }
+
+    function openProductModal() {
+      const modal = document.createElement('div');
+      modal.className = 'modal';
+      modal.innerHTML = `
+        <div class="modal-content">
+          <h2 class="text-amber-400 text-xl mb-4">Novo Produto</h2>
+          <div class="mb-2">
+            <label>Nome:</label>
+            <input type="text" id="productName" class="input-custom" placeholder="Nome do produto">
+          </div>
+          <div class="mb-2">
+            <label>Preço:</label>
+            <input type="number" step="0.01" id="productPrice" class="input-custom" placeholder="0.00">
+          </div>
+          <div class="flex justify-end space-x-2">
+            <button class="btn-primary" onclick="addProduct()">Adicionar</button>
+            <button class="btn-danger" onclick="this.closest('.modal').remove()">Cancelar</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      window.currentModal = modal;
+    }
+
+    function addProduct() {
+      const name = document.getElementById('productName').value.trim();
+      const price = parseFloat(document.getElementById('productPrice').value);
+      if (!name || isNaN(price)) { alert('Dados inválidos'); return; }
+      DATABASE.products.push({ name, price });
+      saveData();
+      document.getElementById('toast').textContent = 'Produto adicionado!';
+      document.getElementById('toast').style.display = 'block';
+      setTimeout(() => document.getElementById('toast').style.display = 'none', 2000);
+      window.currentModal.remove();
+      renderProductList();
+    }
+
+    function deleteProduct(index) {
+      if (!confirm('Excluir produto?')) return;
+      DATABASE.products.splice(index, 1);
+      saveData();
+      renderProductList();
+    }
+
+    // --- Config Functions ---
+    function saveConfig() {
+      const token = document.getElementById('githubToken').value.trim();
+      const repo = document.getElementById('githubRepo').value.trim();
+      const branch = document.getElementById('githubBranch').value.trim() || 'main';
+      const path = document.getElementById('githubPath').value.trim() || 'data.json';
+      githubConfig = { token, repo, branch, path };
+      localStorage.setItem('githubConfig', JSON.stringify(githubConfig));
+      alert('Configuração salva!');
+      // Optionally trigger sync
+    }
+
+    async function forceSync() {
+      await syncToGitHub();
+    }
+
+    // --- Event Listeners ---
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        renderTab(this.dataset.tab);
+      });
+    });
+
+    // --- Initial Load ---
+    window.addEventListener('DOMContentLoaded', loadData);
+  </script>
+</body>
+</html>
