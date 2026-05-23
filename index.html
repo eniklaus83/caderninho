@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Caderninho Digital Pro</title>
+    <!-- Tailwind CSS via Free Public CDN -->
+    <script src="https://tailwindcss.com"></script>
+    <!-- Lucide Icons via Free Public CDN -->
+    <script src="https://unpkg.com"></script>
+    <style>
+        /* Mobile optimization touch tweaks */
+        body { -webkit-tap-highlight-color: transparent; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-between antialiased pb-20 select-none">
+
+    <!-- FIXED TOP HEADER -->
+    <header class="bg-slate-900 border-b border-slate-800 px-4 py-3.5 sticky top-0 z-40 shadow-md">
+        <div class="flex justify-between items-center max-w-md mx-auto">
+            <div class="flex items-center gap-2">
+                <div class="bg-amber-500/10 p-2 rounded-xl text-amber-500">
+                    <i data-lucide="notebook" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 id="view-title" class="font-black text-base tracking-tight text-amber-500 uppercase">Apontar Consumo</h1>
+                    <p class="text-[10px] text-slate-400 font-medium tracking-wide">SISTEMA TOTAL ZERO CUSTO</p>
+                </div>
+            </div>
+            <div id="header-action-zone">
+                <!-- Context buttons injected dynamically here -->
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN APP SCREEN PERSPECTIVE ROUTER CONTAINER -->
+    <main class="flex-1 max-w-md w-full mx-auto px-4 py-4 overflow-y-auto">
+
+        <!-- ============================================== -->
+        <!-- SCREEN 1: CONSUMPTION SCREEN (DEFAULT VIEW)   -->
+        <!-- ============================================== -->
+        <div id="view-consumption" class="space-y-3 view-tab">
+            <div class="relative">
+                <input id="search-consumption-client" type="text" oninput="renderConsumptionView()" placeholder="🔎 Buscar cliente pelo nome..." class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500">
+            </div>
+            <div id="consumption-list" class="space-y-2"></div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- SCREEN 2: ADD PREPAID CREDIT SCREEN           -->
+        <!-- ============================================== -->
+        <div id="view-credit" class="space-y-3 view-tab hidden">
+            <div id="credit-list" class="space-y-2"></div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- SCREEN 3: CLIENT MANAGEMENT SYSTEM            -->
+        <!-- ============================================== -->
+        <div id="view-clients" class="space-y-4 view-tab hidden">
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-3 shadow-md">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Cadastrar Novo Cliente</h3>
+                <input id="input-client-name" type="text" placeholder="Nome do Cliente (Ex: João do Caminhão)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500">
+                <button onclick="addClient()" class="w-full bg-amber-500 text-slate-950 font-black py-3 rounded-xl flex items-center justify-center gap-2 text-sm shadow-md active:scale-95 transition-all">
+                    <i data-lucide="user-plus" class="w-4 h-4"></i> CADASTRAR CLIENTE
+                </button>
+            </div>
+            <div class="border-t border-slate-800 my-2"></div>
+            <div id="clients-registry-list" class="space-y-2"></div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- SCREEN 4: PRODUCT CATALOG SYSTEM (HUNDREDS)    -->
+        <!-- ============================================== -->
+        <div id="view-products" class="space-y-4 view-tab hidden">
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-3 shadow-md">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Cadastrar Novo Produto</h3>
+                <input id="input-product-name" type="text" placeholder="Nome do Produto (Ex: Pastel de Queijo)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500">
+                <input id="input-product-price" type="number" step="0.01" placeholder="Preço de Venda R\$ (Ex: 12.50)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500">
+                <button onclick="addProduct()" class="w-full bg-amber-500 text-slate-950 font-black py-3 rounded-xl flex items-center justify-center gap-2 text-sm shadow-md active:scale-95 transition-all">
+                    <i data-lucide="plus" class="w-4 h-4"></i> CADASTRAR PRODUTO
+                </button>
+            </div>
+            <div class="border-t border-slate-800 my-2"></div>
+            <div class="relative">
+                <input id="search-catalog-product" type="text" oninput="renderProductsView()" placeholder="🔎 Filtrar catálogo de produtos..." class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-amber-500">
+            </div>
+            <div id="products-registry-list" class="space-y-2 max-h-60 overflow-y-auto no-scrollbar"></div>
+        </div>
+
+    </main>
+
+    <!-- MODAL: DENSE CONSUMPTION DROPDOWN SELECTOR -->
+    <div id="modal-billing" class="fixed inset-0 bg-slate-950/90 backdrop-blur-sm z-50 flex items-end justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-2xl p-5 space-y-4 shadow-2xl max-h-[80vh] flex flex-col">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h3 id="billing-client-name" class="font-black text-slate-100 text-lg">Cliente</h3>
+                    <p class="text-xs text-slate-400">Saldo Atual: <span id="billing-client-balance" class="text-emerald-400 font-mono font-bold">R\$ 0,00</span></p>
+                </div>
+                <button onclick="closeBillingModal()" class="text-slate-400 bg-slate-950 p-2 rounded-xl active:scale-90 transition-all"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <input id="search-billing-product" type="text" oninput="filterBillingProducts()" placeholder="Buscar produto para debitar..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-amber-500">
+            <div id="billing-products-grid" class="flex-1 overflow-y-auto space-y-2 no-scrollbar pr-1"></div>
+        </div>
+    </div>
+
+    <!-- UI ALERTA FLUTUANTE (TOAST) -->
+    <div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-rose-600 border border-rose-500 text-white font-extrabold px-6 py-3.5 rounded-xl shadow-2xl text-center text-xs tracking-wide opacity-0 transition-opacity duration-300 pointer-events-none z-50 uppercase">
+        ⚠️ Saldo Insuficiente para este consumo!
+    </div>
+
+    <!-- PERSISTENT APP BOTTOM NAVIGATION TAB BAR -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 py-2 px-3 z-40 shadow-2xl">
+        <div class="max-w-md mx-auto grid grid-cols-4 gap-1.5">
+            <button onclick="switchTab('consumption', 'Apontar Consumo', this)" class="nav-tab-btn flex flex-col items-center gap-1 py-2 rounded-xl text-amber-500 bg-amber-500/10 font-bold transition-all">
+                <i data-lucide="utensils-crossed" class="w-5 h-5"></i><span class="text-[10px]">Consumo</span>
+            </button>
+            <button onclick="switchTab('credit', 'Adicionar Crédito', this)" class="nav-tab-btn flex flex-col items-center gap-1 py-2 rounded-xl text-slate-400 hover:text-slate-200 transition-all">
+                <i data-lucide="circle-dollar-sign" class="w-5 h-5"></i><span class="text-[10px]">+ Crédito</span>
+            </button>
+            <button onclick="switchTab('clients', 'Gerenciar Clientes', this)" class="nav-tab-btn flex flex-col items-center gap-1 py-2 rounded-xl text-slate-400 hover:text-slate-200 transition-all">
+                <i data-lucide="users" class="w-5 h-5"></i><span class="text-[10px]">Clientes</span>
+            </button>
+            <button onclick="switchTab('products', 'Catálogo de Produtos', this)" class="nav-tab-btn flex flex-col items-center gap-1 py-2 rounded-xl text-slate-400 hover:text-slate-200 transition-all">
+                <i data-lucide="package" class="w-5 h-5"></i><span class="text-[10px]">Produtos</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- CORE REVENUE LATCH JAVASCRIPT PROGRAMMING ENGINE -->
+    <script>
+        // Start Global Web Vector Engine icons
+        lucide.createIcons();
+
+        // 🗄️ INJECT LOCALSTORAGE OR SEED DEFAULT DATA LOOPS
+        let DATABASE = JSON.parse(localStorage.getItem('CADERNINHO_DB')) || {
+            clients: [
+                { id: 1, name: "Seu Jorge (Oficina Mecânica)", balance: 75.00 },
+                { id: 2, name: "Maria Augusta Doces", balance: 14.50 }
+            ],
+            products: [
+                { id: 1, name: "🍔 Hambúrguer Clássico X-Salada", price: 22.00 },
+                { id: 2, name: "🍟 Batata Frita Frita Média", price: 15.00 },
+                { id: 3, name: "🥤 Refrigerante Coca Cola Lata", price: 7.00 }
+            ]
+        };
+
+        let activeClientId = null;
+        let activeTabId = 'consumption';
+
+        function saveToDisk() {
