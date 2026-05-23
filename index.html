@@ -580,6 +580,8 @@
       salvarDados();
       fecharModal();
       showToast(id ? 'Cliente atualizado!' : 'Cliente criado!', 'success');
+	  syncWithGitHub()
+	  showToast(id ? 'Dados Atualizados!' : 'GitHub!', 'success');
     }
 
     function editarCliente(id) {
@@ -781,6 +783,8 @@
       }
       atualizarCarrinho();
       showToast('Item adicionado!', 'success');
+	  syncWithGitHub()
+	  showToast(id ? 'Dados Atualizados!' : 'GitHub!', 'success');
     }
 
     function atualizarCarrinho() {
