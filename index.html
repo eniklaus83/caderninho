@@ -1,413 +1,501 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sistema de Crédito e Pedidos</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
-  <script src="https://unpkg.com/lucide@latest"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POS - Pedidos</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdn.jsdelivr.net/npm/lucide-icons@0.477.0/dist/umd/lucide.js" rel="preload" as="script">
+<script src="https://cdn.jsdelivr.net/npm/lucide-icons@0.477.0/dist/umd/lucide.js"></script>
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen p-6">
-  <div class="max-w-6xl mx-auto space-y-8">
-    <!-- Header -->
-    <div class="bg-white shadow-xl rounded-2xl p-6">
-      <h1 class="text-3xl font-bold text-gray-800">Caderninho Digital</h1>
-      <p class="text-gray-500">Caderninho de Pedidos</p>
-    </div>
-
-    <!-- Toast -->
-    <div id="toast" class="fixed top-4 right-4 hidden bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-opacity duration-300"></div>
-
-    <!-- Seção Clientes -->
-    <div class="bg-white shadow-xl rounded-2xl p-6">
-      <h2 class="text-xl font-semibold text-gray-800 mb-4"><i data-lucide="users" class="inline-block w-5 h-5 mr-2"></i>Clientes</h2>
-      <div class="flex gap-2 mb-4">
-        <input id="clientNameInput" type="text" placeholder="Nome do cliente" class="flex-1 p-2 border rounded-lg" />
-        <button onclick="addClient()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i>Adicionar</button>
-      </div>
-      <ul id="clientList" class="space-y-2"></ul>
-    </div>
-
-    <!-- Seção Produtos -->
-    <div class="bg-white shadow-xl rounded-2xl p-6">
-      <h2 class="text-xl font-semibold text-gray-800 mb-4"><i data-lucide="package" class="inline-block w-5 h-5 mr-2"></i>Produtos</h2>
-      <div class="flex gap-2 mb-4">
-        <input id="productNameInput" type="text" placeholder="Nome do produto" class="flex-1 p-2 border rounded-lg" />
-        <input id="productPriceInput" type="number" placeholder="Preço" min="0" step="0.01" class="w-24 p-2 border rounded-lg" />
-        <button onclick="addProduct()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i>Adicionar</button>
-      </div>
-      <ul id="productList" class="space-y-2"></ul>
-    </div>
-
-    <!-- Seção Crédito -->
-    <div class="bg-white shadow-xl rounded-2xl p-6">
-      <h2 class="text-xl font-semibold text-gray-800 mb-4"><i data-lucide="wallet" class="inline-block w-5 h-5 mr-2"></i>Crédito</h2>
-      <div class="flex gap-2 mb-4">
-        <select id="clientSelectCredit" class="flex-1 p-2 border rounded-lg"></select>
-        <input id="creditAmountInput" type="number" placeholder="Valor" step="0.01" class="w-24 p-2 border rounded-lg" />
-        <button onclick="addCredit()" class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition flex items-center gap-2"><i data-lucide="plus-circle" class="w-4 h-4"></i>Adicionar Crédito</button>
-      </div>
-      <ul id="creditList" class="space-y-2"></ul>
-    </div>
-
-    <!-- Seção Pedidos (Carrinho) -->
-    <div class="bg-white shadow-xl rounded-2xl p-6">
-      <h2 class="text-xl font-semibold text-gray-800 mb-4"><i data-lucide="shopping-cart" class="inline-block w-5 h-5 mr-2"></i>Carrinho de Compras</h2>
-      <div class="flex gap-2 mb-4">
-        <select id="clientSelectOrder" class="flex-1 p-2 border rounded-lg"></select>
-        <select id="productSelectOrder" class="flex-1 p-2 border rounded-lg"></select>
-        <input id="quantityInput" type="number" placeholder="Qtd" min="1" step="1" value="1" class="w-16 p-2 border rounded-lg" />
-        <button onclick="addToOrder()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2"><i data-lucide="plus-square" class="w-4 h-4"></i>Adicionar ao Pedido</button>
-      </div>
-      <div id="orderItems" class="mb-4">
-        <p class="text-gray-500 italic">Nenhum item no pedido.</p>
-      </div>
-      <div class="flex justify-between items-center">
-        <span id="orderTotal" class="text-lg font-bold text-gray-800">Total: R$ 0,00</span>
-        <button onclick="commitOrder()" class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition flex items-center gap-2 disabled:opacity-50" id="commitBtn" disabled><i data-lucide="check-circle" class="w-4 h-4"></i>Confirmar Pedido</button>
-      </div>
-    </div>
-
-    <!-- Seção Histórico de Pedidos -->
-    <div class="bg-white shadow-xl rounded-2xl p-6">
-      <h2 class="text-xl font-semibold text-gray-800 mb-4"><i data-lucide="clipboard-list" class="inline-block w-5 h-5 mr-2"></i>Histórico de Pedidos</h2>
-      <ul id="orderHistory" class="space-y-2"></ul>
-    </div>
-
-    <!-- Seção Config GitHub -->
-    <div class="bg-white shadow-xl rounded-2xl p-6">
-      <h2 class="text-xl font-semibold text-gray-800 mb-4"><i data-lucide="github" class="inline-block w-5 h-5 mr-2"></i>Configuração GitHub</h2>
-      <div class="grid grid-cols-2 gap-4 mb-4">
-        <input id="githubUsername" type="text" placeholder="Usuário" class="p-2 border rounded-lg" />
-        <input id="githubRepo" type="text" placeholder="Repositório" class="p-2 border rounded-lg" />
-        <input id="githubToken" type="password" placeholder="Token (clássico)" class="p-2 border rounded-lg" />
-        <input id="githubBranch" type="text" placeholder="Branch (ex: main)" value="main" class="p-2 border rounded-lg" />
-      </div>
-      <button onclick="pushToGitHub()" class="bg-gray-800 text-white px-6 py-2 rounded-lg hover:bg-gray-900 transition flex items-center gap-2"><i data-lucide="upload" class="w-4 h-4"></i>Enviar Dados para GitHub</button>
-      <p id="githubStatus" class="mt-2 text-sm text-gray-600"></p>
-    </div>
+<body class="bg-slate-950 text-slate-200 min-h-screen flex flex-col">
+<header class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur border-b border-slate-800 px-4 py-3 flex items-center justify-between">
+  <h1 class="text-lg font-bold text-amber-400">🍔 POS</h1>
+  <div class="flex items-center gap-3">
+    <span id="githubStatus" class="flex items-center gap-1 text-xs text-slate-400">
+      <i data-lucide="cloud-off" class="w-3 h-3"></i>
+      <span>Offline</span>
+    </span>
+    <button onclick="openModal('settingsModal')" class="p-1.5 rounded-lg hover:bg-slate-800 transition">
+      <i data-lucide="settings" class="w-5 h-5 text-slate-400"></i>
+    </button>
   </div>
+</header>
+<main class="flex-1 overflow-y-auto pb-20 px-4 py-4 space-y-4" id="mainContent">
+  <!-- Content injected by JS -->
+</main>
+<nav class="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur border-t border-slate-800">
+  <div class="flex justify-around items-center h-16 px-2">
+    <button onclick="switchTab('consumo')" class="tab-btn flex flex-col items-center gap-1 text-xs text-slate-400 hover:text-amber-400 transition" data-tab="consumo">
+      <i data-lucide="coffee" class="w-5 h-5"></i>
+      <span>Consumo</span>
+    </button>
+    <button onclick="switchTab('credito')" class="tab-btn flex flex-col items-center gap-1 text-xs text-slate-400 hover:text-amber-400 transition" data-tab="credito">
+      <i data-lucide="wallet" class="w-5 h-5"></i>
+      <span>Crédito</span>
+    </button>
+    <button onclick="switchTab('clientes')" class="tab-btn flex flex-col items-center gap-1 text-xs text-slate-400 hover:text-amber-400 transition" data-tab="clientes">
+      <i data-lucide="users" class="w-5 h-5"></i>
+      <span>Clientes</span>
+    </button>
+    <button onclick="switchTab('produtos')" class="tab-btn flex flex-col items-center gap-1 text-xs text-slate-400 hover:text-amber-400 transition" data-tab="produtos">
+      <i data-lucide="package" class="w-5 h-5"></i>
+      <span>Produtos</span>
+    </button>
+    <button onclick="switchTab('pedidos')" class="tab-btn flex flex-col items-center gap-1 text-xs text-slate-400 hover:text-amber-400 transition" data-tab="pedidos">
+      <i data-lucide="list-ordered" class="w-5 h-5"></i>
+      <span>Pedidos</span>
+    </button>
+  </div>
+</nav>
 
-  <script>
-    // ====== DADOS ======
-    let clients = [];
-    let products = [];
-    let credits = []; // { clientName, amount }
-    let orders = []; // { clientName, items: [{ productName, quantity, unitPrice }], total, date }
-    let currentOrder = []; // { productName, quantity, unitPrice }
+<!-- Settings Modal -->
+<div id="settingsModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
+  <div class="bg-slate-900 rounded-2xl max-w-md w-full p-6 space-y-4">
+    <h2 class="text-lg font-bold text-amber-400">Configurações</h2>
+    <div>
+      <label class="block text-sm text-slate-400 mb-1">GitHub Token</label>
+      <input type="password" id="githubToken" class="w-full bg-slate-800 rounded-lg p-2 text-sm border border-slate-700 focus:border-amber-500 outline-none" placeholder="token...">
+    </div>
+    <div>
+      <label class="block text-sm text-slate-400 mb-1">Repositório (user/repo)</label>
+      <input type="text" id="githubRepo" class="w-full bg-slate-800 rounded-lg p-2 text-sm border border-slate-700 focus:border-amber-500 outline-none" placeholder="ex: joao/pos-data">
+    </div>
+    <div>
+      <label class="block text-sm text-slate-400 mb-1">Caminho do arquivo (ex: data.json)</label>
+      <input type="text" id="githubFilePath" class="w-full bg-slate-800 rounded-lg p-2 text-sm border border-slate-700 focus:border-amber-500 outline-none" value="data.json">
+    </div>
+    <button onclick="saveSettings()" class="w-full bg-amber-500 hover:bg-amber-600 text-black font-semibold py-2 rounded-lg transition">Salvar</button>
+  </div>
+</div>
 
-    // ====== TOAST ======
-    function showToast(message, isError = false) {
-      const toast = document.getElementById('toast');
-      toast.textContent = message;
-      toast.className = 'fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 transition-opacity duration-300 ' + (isError ? 'bg-red-500 text-white' : 'bg-green-500 text-white');
-      toast.classList.remove('hidden');
-      setTimeout(() => {
-        toast.classList.add('hidden');
-      }, 3000);
-    }
+<!-- Invoice Modal (for order confirmation) -->
+<div id="invoiceModal" class="fixed inset-0 z-50 hidden bg-black/60 flex items-center justify-center p-4">
+  <div class="bg-slate-900 rounded-2xl max-w-md w-full p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+    <h2 class="text-lg font-bold text-emerald-400">Revisar Pedido</h2>
+    <div id="invoiceItems" class="space-y-2"></div>
+    <div class="border-t border-slate-700 pt-2 flex justify-between text-sm">
+      <span class="text-slate-400">Total</span>
+      <span id="invoiceTotal" class="font-bold text-emerald-400">R$ 0,00</span>
+    </div>
+    <button onclick="confirmOrder()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-black font-semibold py-2 rounded-lg transition">Confirmar Pedido</button>
+    <button onclick="closeModal('invoiceModal')" class="w-full bg-slate-700 hover:bg-slate-600 text-white py-2 rounded-lg transition">Cancelar</button>
+  </div>
+</div>
 
-    // ====== CLIENTES ======
-    function addClient() {
-      const name = document.getElementById('clientNameInput').value.trim();
-      if (!name) {
-        showToast('Nome do cliente é obrigatório.', true);
-        return;
-      }
-      if (clients.includes(name)) {
-        showToast('Cliente já existe.', true);
-        return;
-      }
-      clients.push(name);
-      document.getElementById('clientNameInput').value = '';
-      showToast('Cliente adicionado: ' + name);
-      renderClients();
-      updateSelects();
-    }
+<!-- Toast container -->
+<div id="toastContainer" class="fixed top-16 right-4 z-50 space-y-2"></div>
 
-    function renderClients() {
-      const ul = document.getElementById('clientList');
-      ul.innerHTML = clients.map(client => '<li class="flex justify-between items-center p-2 bg-gray-50 rounded"><span>' + escapeHTML(client) + '</span><button onclick="deleteClient(\'' + escapeHTML(client) + '\')" class="text-red-500 hover:text-red-700"><i data-lucide="trash-2" class="w-4 h-4"></i></button></li>').join('');
+<script>
+// State
+let data = {
+  produtos: [],
+  clientes: [],
+  creditos: [],
+  pedidos: [],
+  saldo: 0
+};
+let cart = [];
+let currentTab = 'consumo';
+let sha = null;
+const GITHUB_API = 'https://api.github.com';
+let token = '';
+let repo = '';
+let filePath = 'data.json';
+
+// Utility
+function escapeHTML(str) {
+  const div = document.createElement('div');
+  div.appendChild(document.createTextNode(str));
+  return div.innerHTML;
+}
+
+function showToast(msg, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const colors = { info: 'bg-blue-600', success: 'bg-emerald-600', error: 'bg-rose-600' };
+  const toast = document.createElement('div');
+  toast.className = `${colors[type] || 'bg-slate-700'} text-white px-4 py-2 rounded-lg shadow-lg text-sm animate-slide-in`;
+  toast.textContent = msg;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+function openModal(id) {
+  document.getElementById(id).classList.remove('hidden');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.add('hidden');
+}
+
+// Tab switching
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.toggle('text-amber-400', btn.dataset.tab === tab);
+    btn.classList.toggle('text-slate-400', btn.dataset.tab !== tab);
+  });
+  render();
+}
+
+// GitHub operations
+async function fetchGitHub() {
+  if (!token || !repo) return;
+  const url = `${GITHUB_API}/repos/${repo}/contents/${filePath}`;
+  const headers = { 'Authorization': `token ${token}` };
+  try {
+    const resp = await fetch(url, { headers });
+    if (resp.status === 404) {
+      data = { produtos: [], clientes: [], creditos: [], pedidos: [], saldo: 0 };
+      sha = null;
+      document.getElementById('githubStatus').innerHTML = '<i data-lucide="cloud" class="w-3 h-3"></i><span>Online (sem dados)</span>';
       lucide.createIcons();
+      render();
+      return;
     }
-
-    function deleteClient(name) {
-      clients = clients.filter(c => c !== name);
-      credits = credits.filter(c => c.clientName !== name);
-      currentOrder = [];
-      renderClients();
-      updateSelects();
-      showToast('Cliente removido: ' + name);
-    }
-
-    // ====== PRODUTOS ======
-    function addProduct() {
-      const name = document.getElementById('productNameInput').value.trim();
-      const price = parseFloat(document.getElementById('productPriceInput').value);
-      if (!name) {
-        showToast('Nome do produto é obrigatório.', true);
-        return;
-      }
-      if (isNaN(price) || price < 0) {
-        showToast('Preço deve ser um número não negativo.', true);
-        return;
-      }
-      if (products.some(p => p.name === name)) {
-        showToast('Produto já existe.', true);
-        return;
-      }
-      products.push({ name, price });
-      document.getElementById('productNameInput').value = '';
-      document.getElementById('productPriceInput').value = '';
-      showToast('Produto adicionado: ' + name + ' - R$ ' + price.toFixed(2));
-      renderProducts();
-      updateSelects();
-    }
-
-    function renderProducts() {
-      const ul = document.getElementById('productList');
-      ul.innerHTML = products.map(p => '<li class="flex justify-between items-center p-2 bg-gray-50 rounded"><span>' + escapeHTML(p.name) + ' - R$ ' + p.price.toFixed(2) + '</span><button onclick="deleteProduct(\'' + escapeHTML(p.name) + '\')" class="text-red-500 hover:text-red-700"><i data-lucide="trash-2" class="w-4 h-4"></i></button></li>').join('');
-      lucide.createIcons();
-    }
-
-    function deleteProduct(name) {
-      products = products.filter(p => p.name !== name);
-      currentOrder = currentOrder.filter(item => item.productName !== name);
-      renderProducts();
-      updateSelects();
-      showToast('Produto removido: ' + name);
-    }
-
-    // ====== CRÉDITO ======
-    function addCredit() {
-      const clientSelect = document.getElementById('clientSelectCredit');
-      const clientName = clientSelect.value;
-      if (!clientName) {
-        showToast('Selecione um cliente.', true);
-        return;
-      }
-      const amount = parseFloat(document.getElementById('creditAmountInput').value);
-      if (isNaN(amount) || amount <= 0) {
-        showToast('Valor deve ser positivo.', true);
-        return;
-      }
-      const existing = credits.find(c => c.clientName === clientName);
-      if (existing) {
-        existing.amount += amount;
-      } else {
-        credits.push({ clientName, amount });
-      }
-      document.getElementById('creditAmountInput').value = '';
-      showToast('Crédito adicionado: R$ ' + amount.toFixed(2) + ' para ' + clientName);
-      renderCredits();
-    }
-
-    function renderCredits() {
-      const ul = document.getElementById('creditList');
-      ul.innerHTML = credits.map(c => '<li class="flex justify-between items-center p-2 bg-gray-50 rounded"><span>' + escapeHTML(c.clientName) + ': R$ ' + c.amount.toFixed(2) + '</span><button onclick="deleteCredit(\'' + escapeHTML(c.clientName) + '\')" class="text-red-500 hover:text-red-700"><i data-lucide="trash-2" class="w-4 h-4"></i></button></li>').join('');
-      lucide.createIcons();
-    }
-
-    function deleteCredit(clientName) {
-      credits = credits.filter(c => c.clientName !== clientName);
-      renderCredits();
-      showToast('Crédito removido para: ' + clientName);
-    }
-
-    // ====== PEDIDOS (CARRINHO) ======
-    function updateSelects() {
-      const clientSelects = ['clientSelectCredit', 'clientSelectOrder'];
-      clientSelects.forEach(id => {
-        const select = document.getElementById(id);
-        select.innerHTML = '<option value="">Selecione um cliente</option>' + clients.map(c => '<option value="' + escapeHTML(c) + '">' + escapeHTML(c) + '</option>').join('');
-      });
-
-      const productSelect = document.getElementById('productSelectOrder');
-      productSelect.innerHTML = '<option value="">Selecione um produto</option>' + products.map(p => '<option value="' + escapeHTML(p.name) + '">' + escapeHTML(p.name) + ' - R$ ' + p.price.toFixed(2) + '</option>').join('');
-    }
-
-    function addToOrder() {
-      const clientName = document.getElementById('clientSelectOrder').value;
-      const productName = document.getElementById('productSelectOrder').value;
-      const quantity = parseInt(document.getElementById('quantityInput').value);
-
-      if (!clientName) {
-        showToast('Selecione um cliente.', true);
-        return;
-      }
-      if (!productName) {
-        showToast('Selecione um produto.', true);
-        return;
-      }
-      if (isNaN(quantity) || quantity < 1) {
-        showToast('Quantidade deve ser um número inteiro positivo.', true);
-        return;
-      }
-
-      const product = products.find(p => p.name === productName);
-      if (!product) {
-        showToast('Produto não encontrado.', true);
-        return;
-      }
-
-      // Adicionar ou atualizar quantidade no carrinho
-      const existing = currentOrder.find(item => item.productName === productName);
-      if (existing) {
-        existing.quantity += quantity;
-      } else {
-        currentOrder.push({ productName, quantity, unitPrice: product.price });
-      }
-
-      document.getElementById('quantityInput').value = 1;
-      showToast('Item adicionado ao carrinho.');
-      renderOrder();
-    }
-
-    function removeFromOrder(productName) {
-      currentOrder = currentOrder.filter(item => item.productName !== productName);
-      renderOrder();
-      showToast('Item removido do carrinho.');
-    }
-
-    function renderOrder() {
-      const container = document.getElementById('orderItems');
-      const totalSpan = document.getElementById('orderTotal');
-      const commitBtn = document.getElementById('commitBtn');
-
-      if (currentOrder.length === 0) {
-        container.innerHTML = '<p class="text-gray-500 italic">Nenhum item no pedido.</p>';
-        totalSpan.textContent = 'Total: R$ 0,00';
-        commitBtn.disabled = true;
-        return;
-      }
-
-      let total = 0;
-      let html = '<ul class="space-y-2">';
-      currentOrder.forEach(item => {
-        const subtotal = item.quantity * item.unitPrice;
-        total += subtotal;
-        html += '<li class="flex justify-between items-center p-2 bg-gray-50 rounded">' +
-          '<span>' + escapeHTML(item.productName) + ' x' + item.quantity + ' - R$ ' + item.unitPrice.toFixed(2) + ' = R$ ' + subtotal.toFixed(2) + '</span>' +
-          '<button onclick="removeFromOrder(\'' + escapeHTML(item.productName) + '\')" class="text-red-500 hover:text-red-700"><i data-lucide="x-circle" class="w-4 h-4"></i></button>' +
-        '</li>';
-      });
-      html += '</ul>';
-      container.innerHTML = html;
-      totalSpan.textContent = 'Total: R$ ' + total.toFixed(2);
-      commitBtn.disabled = false;
-      lucide.createIcons();
-    }
-
-    function commitOrder() {
-      const clientName = document.getElementById('clientSelectOrder').value;
-      if (!clientName) {
-        showToast('Selecione um cliente.', true);
-        return;
-      }
-      if (currentOrder.length === 0) {
-        showToast('Carrinho vazio.', true);
-        return;
-      }
-
-      const total = currentOrder.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
-
-      // Registrar pedido
-      const order = {
-        clientName,
-        items: currentOrder.map(item => ({ ...item })),
-        total,
-        date: new Date().toLocaleString('pt-BR')
-      };
-      orders.push(order);
-
-      // Debitar do crédito (permitindo negativo)
-      const credit = credits.find(c => c.clientName === clientName);
-      if (credit) {
-        credit.amount -= total;
-      } else {
-        credits.push({ clientName, amount: -total });
-      }
-
-      // Limpar carrinho
-      currentOrder = [];
-      renderOrder();
-      renderCredits();
-      renderOrderHistory();
-      showToast('Pedido confirmado! Débito de R$ ' + total.toFixed(2) + ' para ' + clientName);
-    }
-
-    function renderOrderHistory() {
-      const ul = document.getElementById('orderHistory');
-      if (orders.length === 0) {
-        ul.innerHTML = '<p class="text-gray-500 italic">Nenhum pedido realizado.</p>';
-        return;
-      }
-      ul.innerHTML = orders.map((order, index) => {
-        const itemsHtml = order.items.map(item => escapeHTML(item.productName) + ' x' + item.quantity + ' (R$ ' + item.unitPrice.toFixed(2) + ')').join(', ');
-        return '<li class="p-2 bg-gray-50 rounded"><strong>#' + (index+1) + '</strong> ' + escapeHTML(order.clientName) + ' - Total: R$ ' + order.total.toFixed(2) + '<br><small>' + itemsHtml + ' - ' + order.date + '</small></li>';
-      }).join('');
-    }
-
-    // ====== GITHUB ======
-    function pushToGitHub() {
-      const username = document.getElementById('githubUsername').value.trim();
-      const repo = document.getElementById('githubRepo').value.trim();
-      const token = document.getElementById('githubToken').value.trim();
-      const branch = document.getElementById('githubBranch').value.trim() || 'main';
-
-      if (!username || !repo || !token) {
-        showToast('Preencha todos os campos do GitHub.', true);
-        return;
-      }
-
-      const data = {
-        clients,
-        products,
-        credits,
-        orders
-      };
-      const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
-
-      const url = `https://api.github.com/repos/${username}/${repo}/contents/dados.json`;
-
-      fetch(url, {
-        method: 'PUT',
-        headers: {
-          'Authorization': 'token ' + token,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          message: 'Atualização dos dados do sistema',
-          content: content,
-          branch: branch
-        })
-      })
-      .then(response => {
-        if (!response.ok) {
-          return response.json().then(err => { throw new Error(err.message); });
-        }
-        return response.json();
-      })
-      .then(() => {
-        showToast('Dados enviados ao GitHub com sucesso!');
-        document.getElementById('githubStatus').textContent = 'Último envio: ' + new Date().toLocaleString('pt-BR');
-      })
-      .catch(error => {
-        showToast('Erro ao enviar para GitHub: ' + error.message, true);
-        document.getElementById('githubStatus').textContent = 'Erro: ' + error.message;
-      });
-    }
-
-    // ====== UTILITÁRIOS ======
-    function escapeHTML(str) {
-      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-    }
-
-    // ====== INICIALIZAÇÃO ======
-    updateSelects();
-    renderOrder();
-    renderOrderHistory();
+    if (!resp.ok) throw new Error('Erro ao buscar dados');
+    const body = await resp.json();
+    sha = body.sha;
+    const content = atob(body.content);
+    data = JSON.parse(content);
+    document.getElementById('githubStatus').innerHTML = '<i data-lucide="cloud" class="w-3 h-3"></i><span>Online</span>';
     lucide.createIcons();
-  </script>
+    render();
+  } catch (e) {
+    showToast('Erro ao conectar com GitHub: ' + e.message, 'error');
+    document.getElementById('githubStatus').innerHTML = '<i data-lucide="cloud-off" class="w-3 h-3"></i><span>Offline</span>';
+    lucide.createIcons();
+  }
+}
+
+async function saveToGitHub() {
+  if (!token || !repo) {
+    showToast('Configure o GitHub nas configurações', 'error');
+    return;
+  }
+  const url = `${GITHUB_API}/repos/${repo}/contents/${filePath}`;
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+  const body = { message: 'Atualização POS', content };
+  if (sha) body.sha = sha;
+  try {
+    const resp = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+    if (!resp.ok) {
+      const err = await resp.json();
+      throw new Error(err.message || 'Erro ao salvar');
+    }
+    const result = await resp.json();
+    sha = result.content.sha;
+    showToast('Dados salvos com sucesso!', 'success');
+  } catch (e) {
+    showToast('Erro ao salvar: ' + e.message, 'error');
+    console.error(e);
+  }
+}
+
+// Cart operations
+function addToCart(produtoId, nome, preco) {
+  if (preco < 0) {
+    showToast('Preço inválido!', 'error');
+    return;
+  }
+  const existing = cart.find(item => item.produtoId === produtoId);
+  if (existing) {
+    existing.quantidade++;
+  } else {
+    cart.push({ produtoId, nome, preco, quantidade: 1 });
+  }
+  showToast(`${escapeHTML(nome)} adicionado ao carrinho`, 'success');
+  render();
+}
+
+function removeFromCart(produtoId) {
+  cart = cart.filter(item => item.produtoId !== produtoId);
+  render();
+}
+
+function updateQuantidade(produtoId, delta) {
+  const item = cart.find(i => i.produtoId === produtoId);
+  if (!item) return;
+  item.quantidade = Math.max(1, item.quantidade + delta);
+  render();
+}
+
+function getTotalCart() {
+  return cart.reduce((sum, item) => sum + item.preco * item.quantidade, 0);
+}
+
+// Order flow
+function showInvoice() {
+  if (cart.length === 0) {
+    showToast('Carrinho vazio!', 'error');
+    return;
+  }
+  const container = document.getElementById('invoiceItems');
+  container.innerHTML = cart.map(item => `<div class="flex justify-between text-sm"><span>${escapeHTML(item.nome)} x${item.quantidade}</span><span>R$ ${(item.preco * item.quantidade).toFixed(2)}</span></div>`).join('');
+  document.getElementById('invoiceTotal').textContent = `R$ ${getTotalCart().toFixed(2)}`;
+  openModal('invoiceModal');
+}
+
+function confirmOrder() {
+  const total = getTotalCart();
+  // Débito do saldo (permitir negativo)
+  data.saldo -= total;
+  // Registrar pedido
+  const pedido = {
+    id: Date.now(),
+    items: cart.map(item => ({ ...item })),
+    total,
+    data: new Date().toISOString()
+  };
+  data.pedidos.push(pedido);
+  cart = [];
+  closeModal('invoiceModal');
+  saveToGitHub();
+  render();
+  showToast(`Pedido confirmado! Saldo: R$ ${data.saldo.toFixed(2)}`, 'success');
+}
+
+// Rendering
+function render() {
+  const main = document.getElementById('mainContent');
+  let html = '';
+  switch (currentTab) {
+    case 'consumo':
+      html = renderConsumo();
+      break;
+    case 'credito':
+      html = renderCredito();
+      break;
+    case 'clientes':
+      html = renderClientes();
+      break;
+    case 'produtos':
+      html = renderProdutos();
+      break;
+    case 'pedidos':
+      html = renderPedidos();
+      break;
+    default:
+      html = '<p class="text-center text-slate-500">Selecione uma aba</p>';
+  }
+  main.innerHTML = html;
+  lucide.createIcons();
+  // Update cart badge
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    if (btn.dataset.tab === 'consumo') {
+      let badge = btn.querySelector('.badge-cart');
+      if (!badge) {
+        badge = document.createElement('span');
+        badge.className = 'badge-cart absolute -top-1 -right-2 bg-rose-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center';
+        btn.appendChild(badge);
+      }
+      badge.textContent = cart.length > 0 ? cart.length : '';
+      badge.classList.toggle('hidden', cart.length === 0);
+    }
+  });
+}
+
+function renderConsumo() {
+  let html = `
+    <div class="bg-slate-900 rounded-2xl p-4 space-y-4">
+      <h2 class="text-lg font-bold text-amber-400">Produtos</h2>
+      <div class="grid grid-cols-2 gap-3">
+        ${data.produtos.map(p => `
+          <div class="bg-slate-800 rounded-xl p-3 flex flex-col items-center text-center">
+            <span class="text-sm font-semibold">${escapeHTML(p.nome)}</span>
+            <span class="text-emerald-400 text-xs">R$ ${p.preco.toFixed(2)}</span>
+            <button onclick="addToCart(${p.id}, '${escapeHTML(p.nome)}', ${p.preco})" class="mt-2 bg-amber-500 hover:bg-amber-600 text-black text-xs font-semibold px-3 py-1 rounded-lg transition">Adicionar</button>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    <div class="bg-slate-900 rounded-2xl p-4 space-y-3">
+      <h2 class="text-lg font-bold text-amber-400">Carrinho</h2>
+      ${cart.length === 0 ? '<p class="text-sm text-slate-500">Carrinho vazio</p>' : ''}
+      ${cart.map(item => `
+        <div class="flex items-center justify-between bg-slate-800 rounded-xl p-3">
+          <div class="flex-1">
+            <span class="text-sm font-semibold">${escapeHTML(item.nome)}</span>
+            <span class="text-xs text-slate-400">R$ ${item.preco.toFixed(2)} un</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="updateQuantidade(${item.produtoId}, -1)" class="bg-slate-700 hover:bg-slate-600 text-white p-1 rounded-lg">-</button>
+            <span class="text-sm font-bold">${item.quantidade}</span>
+            <button onclick="updateQuantidade(${item.produtoId}, 1)" class="bg-slate-700 hover:bg-slate-600 text-white p-1 rounded-lg">+</button>
+            <button onclick="removeFromCart(${item.produtoId})" class="text-rose-400 hover:text-rose-300 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+          </div>
+        </div>
+      `).join('')}
+      ${cart.length > 0 ? `
+        <div class="flex justify-between items-center pt-2 border-t border-slate-700">
+          <span class="text-sm font-bold">Total: R$ ${getTotalCart().toFixed(2)}</span>
+          <button onclick="showInvoice()" class="bg-emerald-500 hover:bg-emerald-600 text-black font-semibold px-4 py-2 rounded-lg transition">Fechar Pedido</button>
+        </div>
+      ` : ''}
+    </div>
+    <div class="bg-slate-900 rounded-2xl p-4">
+      <h2 class="text-lg font-bold text-amber-400 mb-2">Saldo</h2>
+      <p class="text-2xl font-bold ${data.saldo >= 0 ? 'text-emerald-400' : 'text-rose-400'}">R$ ${data.saldo.toFixed(2)}</p>
+    </div>
+  `;
+  return html;
+}
+
+function renderCredito() {
+  return `
+    <div class="bg-slate-900 rounded-2xl p-4 space-y-4">
+      <h2 class="text-lg font-bold text-amber-400">Crédito</h2>
+      <div>
+        <label class="block text-sm text-slate-400 mb-1">Valor para adicionar</label>
+        <input type="number" id="creditoValor" class="w-full bg-slate-800 rounded-lg p-2 text-sm border border-slate-700 focus:border-amber-500 outline-none" placeholder="0.00" step="0.01">
+        <button onclick="adicionarCredito()" class="mt-2 bg-amber-500 hover:bg-amber-600 text-black font-semibold px-4 py-2 rounded-lg transition">Adicionar</button>
+      </div>
+      <div>
+        <h3 class="text-sm font-semibold text-slate-400">Histórico</h3>
+        <ul class="space-y-1 mt-2">
+          ${data.creditos.slice().reverse().map(c => `<li class="text-sm text-slate-300">+R$ ${c.valor.toFixed(2)} - ${new Date(c.data).toLocaleString('pt-BR')}</li>`).join('')}
+        </ul>
+      </div>
+    </div>
+  `;
+}
+
+function renderClientes() {
+  return `
+    <div class="bg-slate-900 rounded-2xl p-4 space-y-4">
+      <h2 class="text-lg font-bold text-amber-400">Clientes</h2>
+      <div class="flex gap-2">
+        <input type="text" id="clienteNome" class="flex-1 bg-slate-800 rounded-lg p-2 text-sm border border-slate-700 focus:border-amber-500 outline-none" placeholder="Nome">
+        <button onclick="adicionarCliente()" class="bg-amber-500 hover:bg-amber-600 text-black font-semibold px-4 py-2 rounded-lg transition">+</button>
+      </div>
+      <ul class="space-y-2">
+        ${data.clientes.map(c => `<li class="bg-slate-800 rounded-xl p-3 flex justify-between items-center"><span>${escapeHTML(c.nome)}</span><button onclick="removerCliente(${c.id})" class="text-rose-400 hover:text-rose-300"><i data-lucide="x" class="w-4 h-4"></i></button></li>`).join('')}
+      </ul>
+    </div>
+  `;
+}
+
+function renderProdutos() {
+  return `
+    <div class="bg-slate-900 rounded-2xl p-4 space-y-4">
+      <h2 class="text-lg font-bold text-amber-400">Produtos</h2>
+      <div class="grid grid-cols-2 gap-2">
+        <input type="text" id="produtoNome" class="bg-slate-800 rounded-lg p-2 text-sm border border-slate-700 focus:border-amber-500 outline-none" placeholder="Nome">
+        <input type="number" id="produtoPreco" class="bg-slate-800 rounded-lg p-2 text-sm border border-slate-700 focus:border-amber-500 outline-none" placeholder="Preço" step="0.01">
+      </div>
+      <button onclick="adicionarProduto()" class="w-full bg-amber-500 hover:bg-amber-600 text-black font-semibold py-2 rounded-lg transition">Adicionar Produto</button>
+      <ul class="space-y-2">
+        ${data.produtos.map(p => `<li class="bg-slate-800 rounded-xl p-3 flex justify-between items-center"><span>${escapeHTML(p.nome)}</span><span class="text-emerald-400 text-sm">R$ ${p.preco.toFixed(2)}</span><button onclick="removerProduto(${p.id})" class="text-rose-400 hover:text-rose-300"><i data-lucide="x" class="w-4 h-4"></i></button></li>`).join('')}
+      </ul>
+    </div>
+  `;
+}
+
+function renderPedidos() {
+  return `
+    <div class="bg-slate-900 rounded-2xl p-4 space-y-4">
+      <h2 class="text-lg font-bold text-amber-400">Histórico de Pedidos</h2>
+      ${data.pedidos.length === 0 ? '<p class="text-sm text-slate-500">Nenhum pedido registrado</p>' : ''}
+      ${data.pedidos.slice().reverse().map(p => `
+        <div class="bg-slate-800 rounded-xl p-3 space-y-1">
+          <div class="flex justify-between text-sm">
+            <span class="font-semibold">Pedido #${p.id}</span>
+            <span class="text-emerald-400">R$ ${p.total.toFixed(2)}</span>
+          </div>
+          <div class="text-xs text-slate-400">${new Date(p.data).toLocaleString('pt-BR')}</div>
+          <ul class="text-xs text-slate-300 list-disc list-inside">
+            ${p.items.map(item => `<li>${escapeHTML(item.nome)} x${item.quantidade} - R$ ${(item.preco * item.quantidade).toFixed(2)}</li>`).join('')}
+          </ul>
+        </div>
+      `).join('')}
+    </div>
+}
+
+// Actions
+
+function adicionarCredito() {
+  const valor = parseFloat(document.getElementById('creditoValor').value);
+  if (isNaN(valor) || valor <= 0) {
+    showToast('Valor inválido', 'error');
+    return;
+  }
+  data.saldo += valor;
+  data.creditos.push({ valor, data: new Date().toISOString() });
+  saveToGitHub();
+  render();
+  showToast(`Crédito de R$ ${valor.toFixed(2)} adicionado!`, 'success');
+}
+
+function adicionarCliente() {
+  const nome = document.getElementById('clienteNome').value.trim();
+  if (!nome) {
+    showToast('Nome inválido', 'error');
+    return;
+  }
+  const id = Date.now();
+  data.clientes.push({ id, nome });
+  document.getElementById('clienteNome').value = '';
+  saveToGitHub();
+  render();
+  showToast('Cliente adicionado!', 'success');
+}
+
+function removerCliente(id) {
+  data.clientes = data.clientes.filter(c => c.id !== id);
+  saveToGitHub();
+  render();
+}
+
+function adicionarProduto() {
+  const nome = document.getElementById('produtoNome').value.trim();
+  const preco = parseFloat(document.getElementById('produtoPreco').value);
+  if (!nome || isNaN(preco) || preco < 0) {
+    showToast('Dados inválidos', 'error');
+    return;
+  }
+  const id = Date.now();
+  data.produtos.push({ id, nome, preco });
+  document.getElementById('produtoNome').value = '';
+  document.getElementById('produtoPreco').value = '';
+  saveToGitHub();
+  render();
+  showToast('Produto adicionado!', 'success');
+}
+
+function removerProduto(id) {
+  data.produtos = data.produtos.filter(p => p.id !== id);
+  saveToGitHub();
+  render();
+}
+
+// Settings
+function saveSettings() {
+  token = document.getElementById('githubToken').value.trim();
+  repo = document.getElementById('githubRepo').value.trim();
+  filePath = document.getElementById('githubFilePath').value.trim() || 'data.json';
+  if (!token || !repo) {
+    showToast('Preencha token e repositório', 'error');
+    return;
+  }
+  closeModal('settingsModal');
+  fetchGitHub();
+  showToast('Configurações salvas!', 'success');
+}
+
+// Init
+lucide.createIcons();
+render();
+</script>
 </body>
 </html>
