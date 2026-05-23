@@ -86,7 +86,7 @@
     <h1><i data-lucide="notebook-text"></i> Caderninho Digital Pro</h1>
     <div class="github-status" id="githubStatus" onclick="syncWithGitHub()">
       <span class="indicator" id="syncIndicator"></span>
-      <span id="syncLabel">Sincronizado</span>
+      <span id="syncLabel">Atualizar Servidor</span>
     </div>
   </header>
 
@@ -227,7 +227,8 @@
           <input type="text" id="githubFile" placeholder="data.json" value="data.json">
         </div>
         <button class="btn btn-primary w-full" onclick="salvarConfig()">Salvar Configuração</button>
-        <button class="btn btn-secondary w-full mt-2" onclick="syncWithGitHub()">Sincronizar Agora</button>
+        <button class="btn btn-success w-full mt-2" onclick="importarDeGitHub(true)">Baixar dados do GitHub</button>
+        <button class="btn btn-secondary w-full mt-2" onclick="syncWithGitHub()">Subir dados para GitHub</button>
       </div>
     </div>
   </div>
@@ -259,7 +260,6 @@
     </div>
   </nav>
 
-  <!-- Modais -->
   <div id="modalOverlay" class="modal-overlay" style="display:none;">
     <div class="modal-content">
       <div class="modal-title">
@@ -306,15 +306,26 @@
 
     // ========== INICIALIZAÇÃO ==========
     document.addEventListener('DOMContentLoaded', function() {
+      // 1. Carrega as configurações visuais do formulário imediatamente
       carregarConfig();
-      carregarDados();
+      
+      // 2. Carrega primeiro o que estiver salvo localmente para a tela montar na hora
+      carregarDadosLocais();
+      
+      // 3. Renderiza os ícones do menu imediatamente sem esperar requisições de rede
       lucide.createIcons();
+      
+      // 4. Tenta buscar do GitHub em segundo plano, sem travar a interface
+      if (config.token && config.repo) {
+        importarDeGitHub(false);
+      }
     });
 
     // ========== NAVEGAÇÃO ABAS ==========
     function ativarAba(aba) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       document.getElementById('tab-' + aba).classList.add('active');
+      
       document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
       document.querySelector(`.nav-item[data-tab="${aba}"]`).classList.add('active');
       if (aba === 'pedidos') renderizarPedidos();
@@ -326,16 +337,64 @@
     }
 
     // ========== GITHUB SYNC ==========
-    function setSyncStatus(syncing) {
+    function setSyncStatus(syncing, textoCustomizado = null) {
       const indicator = document.getElementById('syncIndicator');
       const label = document.getElementById('syncLabel');
       if (syncing) {
         indicator.classList.add('syncing');
-        label.textContent = 'Sincronizando...';
+        label.textContent = textoCustomizado || 'Sincronizando...';
       } else {
         indicator.classList.remove('syncing');
-        label.textContent = 'Sincronizado';
+        label.textContent = textoCustomizado || 'Sincronizado';
       }
+    }
+
+    // Busca os dados existentes do JSON remoto para atualizar a tela local
+    async function importarDeGitHub(notificarSucesso = false) {
+      if (!config.token || !config.repo) {
+        if (notificarSucesso) showToast('Configure o GitHub na aba Config', 'error');
+        return false;
+      }
+
+      setSyncStatus(true, 'Baixando dados...');
+      try {
+        const url = `https://api.github.com/repos/${config.repo}/contents/${config.file}`;
+        const headers = {
+          'Authorization': 'token ' + config.token,
+          'Accept': 'application/vnd.github.v3+json'
+        };
+
+        const res = await fetch(url, { headers });
+        if (res.ok) {
+          const data = await res.json();
+          const decodedContent = decodeURIComponent(escape(atob(data.content)));
+          const parsed = JSON.parse(decodedContent);
+
+          if (parsed) {
+            DB.clients = parsed.clients || [];
+            DB.products = parsed.products || [];
+            DB.orders = parsed.orders || [];
+            
+            localStorage.setItem('caderninhoDB', JSON.stringify(DB));
+            renderizarTudo();
+            
+            if (notificarSucesso) showToast('Dados importados do GitHub!', 'success');
+            setSyncStatus(false, 'Sincronizado');
+            return true;
+          }
+        } else if (res.status === 404) {
+          if (notificarSucesso) showToast('Arquivo JSON não encontrado. Ele será criado no primeiro envio.', 'info');
+          setSyncStatus(false, 'Sem arquivo remoto');
+        } else {
+          if (notificarSucesso) showToast('Erro ao baixar dados do GitHub.', 'error');
+          setSyncStatus(false, 'Erro na Sinc.');
+        }
+      } catch (err) {
+        console.error(err);
+        if (notificarSucesso) showToast('Falha ao conectar com GitHub: ' + err.message, 'error');
+        setSyncStatus(false, 'Erro de rede');
+      }
+      return false;
     }
 
     async function syncWithGitHub() {
@@ -343,14 +402,14 @@
         showToast('Configure GitHub nas Configurações', 'error');
         return;
       }
-      setSyncStatus(true);
+      setSyncStatus(true, 'Enviando dados...');
       try {
         const url = `https://api.github.com/repos/${config.repo}/contents/${config.file}`;
         const headers = {
           'Authorization': 'token ' + config.token,
           'Accept': 'application/vnd.github.v3+json'
         };
-        // Buscar SHA atual
+
         let sha = null;
         try {
           const getRes = await fetch(url, { headers });
@@ -359,26 +418,29 @@
             sha = getData.sha;
           }
         } catch (e) { }
+
         const content = btoa(unescape(encodeURIComponent(JSON.stringify(DB, null, 2))));
         const body = {
           message: 'Atualização Caderninho Digital Pro',
           content: content
         };
         if (sha) body.sha = sha;
+
         const putRes = await fetch(url, {
           method: 'PUT',
           headers: headers,
           body: JSON.stringify(body)
         });
+
         if (!putRes.ok) {
           const err = await putRes.json();
           throw new Error(err.message || 'Erro ao sincronizar');
         }
-        showToast('Dados sincronizados com sucesso!', 'success');
+        showToast('Dados salvos no GitHub com sucesso!', 'success');
+        setSyncStatus(false, 'Sincronizado');
       } catch (err) {
-        showToast('Erro na sincronização: ' + err.message, 'error');
-      } finally {
-        setSyncStatus(false);
+        showToast('Erro ao salvar no GitHub: ' + err.message, 'error');
+        setSyncStatus(false, 'Erro na Sinc.');
       }
     }
 
@@ -404,7 +466,7 @@
     }
 
     // ========== DADOS ==========
-    function carregarDados() {
+    function carregarDadosLocais() {
       try {
         const saved = localStorage.getItem('caderninhoDB');
         if (saved) {
@@ -419,7 +481,6 @@
 
     function salvarDados() {
       localStorage.setItem('caderninhoDB', JSON.stringify(DB));
-      // Atualizar interface
       renderizarTudo();
     }
 
@@ -429,6 +490,7 @@
       renderizarClientes();
       renderizarProdutos();
       renderizarPedidos();
+      atualizarSelectProdutos();
       lucide.createIcons();
     }
 
@@ -501,7 +563,7 @@
         showToast('Nome do cliente é obrigatório.', 'error');
         return;
       }
-      if (isNaN(saldo) || saldo < 0) {
+      if (isNaN(saldo)) {
         showToast('Saldo inválido.', 'error');
         return;
       }
@@ -602,7 +664,7 @@
         return;
       }
       if (isNaN(preco) || preco < 0) {
-        showToast('Preço inválido (não pode ser negativo).', 'error');
+        showToast('Preço inválido.', 'error');
         return;
       }
       if (id) {
@@ -617,9 +679,9 @@
       }
       salvarDados();
       fecharModal();
-      // Atualizar select de produtos
       atualizarSelectProdutos();
       showToast(id ? 'Produto atualizado!' : 'Produto criado!', 'success');
+	  syncWithGitHub()
     }
 
     function editarProduto(id) {
@@ -637,6 +699,7 @@
 
     function atualizarSelectProdutos() {
       const select = document.getElementById('consumoProdutoSelect');
+      if(!select) return;
       select.innerHTML = '<option value="">Selecione um produto</option>';
       DB.products.forEach(p => {
         select.innerHTML += `<option value="${p.id}">${escapeHTML(p.name)} - R$ ${p.price.toFixed(2)}</option>`;
@@ -697,7 +760,7 @@
         return;
       }
       if (qtd < 1 || qtd > 999) {
-        showToast('Quantidade inválida (1-999).', 'error');
+        showToast('Quantidade inválida.', 'error');
         return;
       }
       const produto = DB.products.find(p => p.id === prodId);
@@ -712,7 +775,7 @@
         consumoState.carrinho.push({ productId: prodId, name: produto.name, price: produto.price, qty: qtd });
       }
       atualizarCarrinho();
-      showToast('Item adicionado ao carrinho!', 'success');
+      showToast('Item adicionado!', 'success');
     }
 
     function atualizarCarrinho() {
@@ -780,21 +843,14 @@
       let totalDebito = 0;
       const items = consumoState.carrinho.map(item => {
         totalDebito += item.price * item.qty;
-        return {
-          productId: item.productId,
-          name: item.name,
-          price: item.price,
-          qty: item.qty
-        };
+        return { productId: item.productId, name: item.name, price: item.price, qty: item.qty };
       });
-      // Debita do cliente (permite saldo negativo)
       const clienteIdx = DB.clients.findIndex(c => c.id === consumoState.selectedClient.id);
       if (clienteIdx === -1) {
         showToast('Cliente não encontrado.', 'error');
         return;
       }
       DB.clients[clienteIdx].balance -= totalDebito;
-      // Registra pedido
       const pedido = {
         id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
         clientId: consumoState.selectedClient.id,
@@ -804,18 +860,15 @@
         date: new Date().toISOString()
       };
       DB.orders.push(pedido);
-      // Limpa carrinho
       consumoState.carrinho = [];
       salvarDados();
       atualizarCarrinho();
-      showToast('Pedido confirmado com sucesso!', 'success');
-      // Atualizar interface de consumo
+      showToast('Pedido confirmado!', 'success');
       document.getElementById('consumoClienteNome').textContent = DB.clients[clienteIdx].name + ' (Saldo: R$ ' + DB.clients[clienteIdx].balance.toFixed(2) + ')';
     }
 
     // ========== CRÉDITO/DÉBITO ==========
     let creditoState = { selectedClient: null };
-
     function renderizarClientesCredito() {
       const search = document.getElementById('creditoClienteSearch').value.toLowerCase();
       const lista = document.getElementById('creditoClienteList');
@@ -876,7 +929,7 @@
       if (tipo === 'credito') {
         DB.clients[clienteIdx].balance += valor;
       } else {
-        DB.clients[clienteIdx].balance -= valor; // permite negativo
+        DB.clients[clienteIdx].balance -= valor;
       }
       salvarDados();
       creditoState.selectedClient = DB.clients[clienteIdx];
@@ -892,7 +945,6 @@
         lista.innerHTML = '<p class="text-muted text-center">Nenhum pedido registrado.</p>';
         return;
       }
-      // Ordenar do mais recente
       const sorted = [...DB.orders].reverse();
       lista.innerHTML = sorted.map(pedido => `
         <div class="card" style="padding:12px; margin-bottom:8px;">
@@ -913,20 +965,11 @@
       document.getElementById('modalOverlay').style.display = 'none';
     }
 
-    // Fechar modal clicando fora
     document.getElementById('modalOverlay').addEventListener('click', function(e) {
       if (e.target === this) fecharModal();
     });
 
-    // ========== INICIALIZAÇÃO ADICIONAL ==========
-    document.getElementById('consumoProdutoSelect').addEventListener('change', function() {
-      // Nada por enquanto
-    });
-
-    // Atualizar saldo do cliente selecionado na aba consumo após carregar
-    // Já é atualizado no confirmarPedido
-
-    console.log('Caderninho Digital Pro carregado!');
+    console.log('Caderninho Digital Pro inicializado e estável!');
   </script>
 </body>
 </html>
