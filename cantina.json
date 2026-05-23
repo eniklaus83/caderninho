@@ -1,0 +1,178 @@
+{
+  "clients": [
+    {
+      "id": "mpiw592ke719t",
+      "name": "Ernesto Niklaus (Benjamin)",
+      "balance": -7
+    },
+    {
+      "id": "mpiw5jvws24k2",
+      "name": "Erywan Freitas",
+      "balance": 50
+    },
+    {
+      "id": "mpiw5quceuq27",
+      "name": "Ana Froes",
+      "balance": 100
+    },
+    {
+      "id": "mpiw5y3ss8vr1",
+      "name": "Aline Bueno",
+      "balance": 20
+    },
+    {
+      "id": "mpixtu8fjmnsz",
+      "name": "Ricardo Froes",
+      "balance": 50
+    },
+    {
+      "id": "mpixu3m49weq8",
+      "name": "Pastor Junior",
+      "balance": 100
+    },
+    {
+      "id": "mpixudcodglai",
+      "name": "Márcio Prampolim",
+      "balance": 50
+    }
+  ],
+  "products": [
+    {
+      "id": "mpiw67kan5x3t",
+      "name": "Suco",
+      "price": 10
+    },
+    {
+      "id": "mpiw6dvs6gmeb",
+      "name": "Salgado",
+      "price": 10
+    },
+    {
+      "id": "mpiw6jh9vctso",
+      "name": "Bala",
+      "price": 2
+    },
+    {
+      "id": "mpixuly0gr723",
+      "name": "Coca-Cola",
+      "price": 5
+    },
+    {
+      "id": "mpixuqy9x2jyp",
+      "name": "Fanta",
+      "price": 5
+    },
+    {
+      "id": "mpixuvu9scryc",
+      "name": "Guaraná",
+      "price": 5
+    },
+    {
+      "id": "mpixv0v13eybd",
+      "name": "Pastel",
+      "price": 10
+    },
+    {
+      "id": "mpixv5ggcz6so",
+      "name": "Esfiha",
+      "price": 10
+    },
+    {
+      "id": "mpixvdqwqjlib",
+      "name": "Kit-Kat",
+      "price": 5
+    }
+  ],
+  "orders": [
+    {
+      "id": "mpiw6tc8kc4s5",
+      "clientId": "mpiw592ke719t",
+      "clientName": "Ernesto Niklaus (Benjamin)",
+      "items": [
+        {
+          "productId": "mpiw67kan5x3t",
+          "name": "Suco",
+          "price": 10,
+          "qty": 1
+        },
+        {
+          "productId": "mpiw6dvs6gmeb",
+          "name": "Salgado",
+          "price": 10,
+          "qty": 1
+        }
+      ],
+      "total": 20,
+      "date": "2026-05-23T22:00:25.352Z"
+    },
+    {
+      "id": "mpixw536v1bpx",
+      "clientId": "mpiw592ke719t",
+      "clientName": "Ernesto Niklaus (Benjamin)",
+      "items": [
+        {
+          "productId": "mpiw6jh9vctso",
+          "name": "Bala",
+          "price": 2,
+          "qty": 1
+        },
+        {
+          "productId": "mpixuqy9x2jyp",
+          "name": "Fanta",
+          "price": 5,
+          "qty": 1
+        },
+        {
+          "productId": "mpixvdqwqjlib",
+          "name": "Kit-Kat",
+          "price": 5,
+          "qty": 1
+        }
+      ],
+      "total": 12,
+      "date": "2026-05-23T22:48:06.594Z"
+    },
+    {
+      "id": "mpixwx0gkgq5k",
+      "clientId": "mpiw592ke719t",
+      "clientName": "Ernesto Niklaus (Benjamin)",
+      "items": [
+        {
+          "productId": "mpiw6dvs6gmeb",
+          "name": "Salgado",
+          "price": 10,
+          "qty": 1
+        },
+        {
+          "productId": "mpixv0v13eybd",
+          "name": "Pastel",
+          "price": 10,
+          "qty": 1
+        },
+        {
+          "productId": "mpixuly0gr723",
+          "name": "Coca-Cola",
+          "price": 5,
+          "qty": 1
+        }
+      ],
+      "total": 25,
+      "date": "2026-05-23T22:48:42.784Z"
+    },
+    {
+      "id": "mpixxoy85eqm5",
+      "clientId": "mpiw5y3ss8vr1",
+      "clientName": "Aline Bueno",
+      "items": [
+        {
+          "productId": "mpiw67kan5x3t",
+          "name": "Suco",
+          "price": 10,
+          "qty": 4
+        }
+      ],
+      "total": 40,
+      "date": "2026-05-23T22:49:18.992Z"
+    }
+  ]
+}
