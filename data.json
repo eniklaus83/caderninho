@@ -23,7 +23,7 @@
     {
       "id": "mpiyrkodop4xd",
       "name": "Pastor Junior",
-      "balance": 100
+      "balance": 97.5
     },
     {
       "id": "mpiys47udqmjg",
@@ -190,6 +190,21 @@
       ],
       "total": 10,
       "date": "2026-05-23T23:14:27.317Z"
+    },
+    {
+      "id": "mpizv06t4anmf",
+      "clientId": "mpiyrkodop4xd",
+      "clientName": "Pastor Junior",
+      "items": [
+        {
+          "productId": "prod_doce_012",
+          "name": "Fini Tubo de Morango",
+          "price": 2.5,
+          "qty": 1
+        }
+      ],
+      "total": 2.5,
+      "date": "2026-05-23T23:43:12.821Z"
     }
   ]
 }
