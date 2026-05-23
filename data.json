@@ -18,7 +18,7 @@
     {
       "id": "mpiw5y3ss8vr1",
       "name": "Aline Bueno",
-      "balance": 10
+      "balance": 0
     },
     {
       "id": "mpiyrkodop4xd",
@@ -28,7 +28,7 @@
     {
       "id": "mpiys47udqmjg",
       "name": "Márcio Prampolim",
-      "balance": 50
+      "balance": 60
     },
     {
       "id": "mpiysft88ns6b",
@@ -144,6 +144,27 @@
       ],
       "total": 20,
       "date": "2026-05-23T22:00:25.352Z"
+    },
+    {
+      "id": "mpiyu0s5686he",
+      "clientId": "mpiw5y3ss8vr1",
+      "clientName": "Aline Bueno",
+      "items": [
+        {
+          "productId": "prod_chocolate_014",
+          "name": "Kit Kat Ao Leite 41g",
+          "price": 5.5,
+          "qty": 1
+        },
+        {
+          "productId": "prod_salgado_010",
+          "name": "Esfiha de Carne",
+          "price": 4.5,
+          "qty": 1
+        }
+      ],
+      "total": 10,
+      "date": "2026-05-23T23:14:27.317Z"
     }
   ]
 }
