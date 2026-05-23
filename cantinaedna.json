@@ -1,5 +1,11 @@
 {
-  "clients": [],
+  "clients": [
+    {
+      "name": "Ernesto Niklaus",
+      "phone": "(11) 971110901",
+      "credit": 0
+    }
+  ],
   "products": [],
   "orders": []
 }
