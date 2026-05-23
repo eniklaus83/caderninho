@@ -84,7 +84,11 @@
   <div class="toast" id="toast"></div>
   <header class="header">
     <h1><i data-lucide="notebook-text"></i> Caderninho Digital Pro</h1>
+<<<<<<< HEAD
     <div class="github-status" id="githubStatus" onclick="importarDeGitHub(true)">
+=======
+    <div class="github-status" id="githubStatus" onclick="importarDeGitHub()">
+>>>>>>> 77196693fba5fd17291ffda77e99d1296d253e83
       <span class="indicator" id="syncIndicator"></span>
       <span id="syncLabel">Sincronizado</span>
     </div>
@@ -299,6 +303,7 @@
     }
 
     // ========== INICIALIZAÇÃO ==========
+<<<<<<< HEAD
     document.addEventListener('DOMContentLoaded', function() {
       // 1. Carrega as configurações visuais do formulário imediatamente
       carregarConfig();
@@ -317,6 +322,18 @@
 
     // ========== NAVEGAÇÃO ABAS ==========
     function ativarAba(aba) {
+=======
+    document.addEventListener('DOMContentLoaded', async function() {
+      carregarConfig();
+      // Tenta puxar do GitHub na inicialização de forma silenciosa.
+      // Se falhar ou não tiver configurado, ele cai de volta para o LocalStorage automaticamente.
+      await carregarDados();
+      lucide.createIcons();
+    });
+
+    // ========== NAVEGAÇÃO ABAS ==========
+    function activarAba(aba) {
+>>>>>>> 77196693fba5fd17291ffda77e99d1296d253e83
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       document.getElementById('tab-' + aba).classList.add('active');
       
@@ -331,11 +348,16 @@
     }
 
     // ========== GITHUB SYNC ==========
+<<<<<<< HEAD
     function setSyncStatus(syncing, textoCustomizado = null) {
+=======
+    function setSyncStatus(syncing, labelText = 'Sincronizado') {
+>>>>>>> 77196693fba5fd17291ffda77e99d1296d253e83
       const indicator = document.getElementById('syncIndicator');
       const label = document.getElementById('syncLabel');
       if (syncing) {
         indicator.classList.add('syncing');
+<<<<<<< HEAD
         label.textContent = textoCustomizado || 'Sincronizando...';
       } else {
         indicator.classList.remove('syncing');
@@ -351,6 +373,23 @@
       }
 
       setSyncStatus(true, 'Baixando dados...');
+=======
+        label.textContent = labelText;
+      } else {
+        indicator.classList.remove('syncing');
+        label.textContent = labelText;
+      }
+    }
+
+    // NOVA FUNÇÃO: Busca os dados existentes do JSON do GitHub para não sobrescrever do zero
+    async function importarDeGitHub(notificarSucesso = false) {
+      if (!config.token || !config.repo) {
+        if (notificarSucesso) showToast('Configure GitHub nas Configurações', 'error');
+        return false;
+      }
+
+      setSyncStatus(true, 'Bixando dados...');
+>>>>>>> 77196693fba5fd17291ffda77e99d1296d253e83
       try {
         const url = `https://api.github.com/repos/${config.repo}/contents/${config.file}`;
         const headers = {
@@ -361,6 +400,10 @@
         const res = await fetch(url, { headers });
         if (res.ok) {
           const data = await res.json();
+<<<<<<< HEAD
+=======
+          // Decodifica o Base64 vindo do GitHub tratando caracteres especiais (UTF-8)
+>>>>>>> 77196693fba5fd17291ffda77e99d1296d253e83
           const decodedContent = decodeURIComponent(escape(atob(data.content)));
           const parsed = JSON.parse(decodedContent);
 
@@ -369,15 +412,24 @@
             DB.products = parsed.products || [];
             DB.orders = parsed.orders || [];
             
+<<<<<<< HEAD
             localStorage.setItem('caderninhoDB', JSON.stringify(DB));
             renderizarTudo();
             
             if (notificarSucesso) showToast('Dados importados do GitHub!', 'success');
+=======
+            // Salva também localmente para garantir o backup local atualizado
+            localStorage.setItem('caderninhoDB', JSON.stringify(DB));
+            renderizarTudo();
+            
+            if (notificarSucesso) showToast('Dados importados do GitHub com sucesso!', 'success');
+>>>>>>> 77196693fba5fd17291ffda77e99d1296d253e83
             setSyncStatus(false, 'Sincronizado');
             return true;
           }
         } else if (res.status === 404) {
           if (notificarSucesso) showToast('Arquivo JSON não encontrado. Ele será criado no primeiro envio.', 'info');
+<<<<<<< HEAD
           setSyncStatus(false, 'Sem arquivo remoto');
         } else {
           if (notificarSucesso) showToast('Erro ao baixar dados do GitHub.', 'error');
@@ -388,6 +440,16 @@
         if (notificarSucesso) showToast('Falha ao conectar com GitHub: ' + err.message, 'error');
         setSyncStatus(false, 'Erro de rede');
       }
+=======
+        } else {
+          if (notificarSucesso) showToast('Erro ao baixar dados do GitHub.', 'error');
+        }
+      } catch (err) {
+        console.error(err);
+        if (notificarSucesso) showToast('Falha na conexão com GitHub: ' + err.message, 'error');
+      }
+      setSyncStatus(false, 'Erro na Sinc.');
+>>>>>>> 77196693fba5fd17291ffda77e99d1296d253e83
       return false;
     }
 
@@ -404,6 +466,10 @@
           'Accept': 'application/vnd.github.v3+json'
         };
 
+<<<<<<< HEAD
+=======
+        // Buscar SHA atual para permitir a atualização do arquivo existente
+>>>>>>> 77196693fba5fd17291ffda77e99d1296d253e83
         let sha = null;
         try {
           const getRes = await fetch(url, { headers });
@@ -460,6 +526,7 @@
     }
 
     // ========== DADOS ==========
+<<<<<<< HEAD
     function carregarDadosLocais() {
       try {
         const saved = localStorage.getItem('caderninhoDB');
@@ -470,12 +537,36 @@
           if (parsed.orders) DB.orders = parsed.orders;
         }
       } catch (e) {}
+=======
+    async function carregarDados() {
+      // 1. Primeiro tenta trazer as informações atualizadas do GitHub
+      const carregouDoGithub = await importarDeGitHub(false);
+
+      // 2. Se não conseguiu carregar do GitHub (ou não configurado), usa o LocalStorage
+      if (!carregouDoGithub) {
+        try {
+          const saved = localStorage.getItem('caderninhoDB');
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            if (parsed.clients) DB.clients = parsed.clients;
+            if (parsed.products) DB.products = parsed.products;
+            if (parsed.orders) DB.orders = parsed.orders;
+            showToast('Dados carregados localmente.', 'info');
+          }
+        } catch (e) {}
+      }
+>>>>>>> 77196693fba5fd17291ffda77e99d1296d253e83
       renderizarTudo();
     }
 
     function salvarDados() {
       localStorage.setItem('caderninhoDB', JSON.stringify(DB));
       renderizarTudo();
+<<<<<<< HEAD
+=======
+      // Opcional: Descomente a linha abaixo se quiser que SALVE no GitHub automaticamente a cada clique
+      // syncWithGitHub(); 
+>>>>>>> 77196693fba5fd17291ffda77e99d1296d253e83
     }
 
     function renderizarTudo() {
@@ -484,7 +575,10 @@
       renderizarClientes();
       renderizarProdutos();
       renderizarPedidos();
+<<<<<<< HEAD
       atualizarSelectProdutos();
+=======
+>>>>>>> 77196693fba5fd17291ffda77e99d1296d253e83
       lucide.createIcons();
     }
 
@@ -674,7 +768,11 @@
       salvarDados();
       fecharModal();
       atualizarSelectProdutos();
+<<<<<<< HEAD
       showToast(id ? 'Produto atualizado!' : 'Produto criado!', 'success');
+=======
+      showToast(id ? 'Produto updated!' : 'Produto criado!', 'success');
+>>>>>>> 77196693fba5fd17291ffda77e99d1296d253e83
     }
 
     function editarProduto(id) {
@@ -692,7 +790,10 @@
 
     function atualizarSelectProdutos() {
       const select = document.getElementById('consumoProdutoSelect');
+<<<<<<< HEAD
       if(!select) return;
+=======
+>>>>>>> 77196693fba5fd17291ffda77e99d1296d253e83
       select.innerHTML = '<option value="">Selecione um produto</option>';
       DB.products.forEach(p => {
         select.innerHTML += `<option value="${p.id}">${escapeHTML(p.name)} - R$ ${p.price.toFixed(2)}</option>`;
@@ -962,7 +1063,11 @@
       if (e.target === this) fecharModal();
     });
 
+<<<<<<< HEAD
     console.log('Caderninho Digital Pro inicializado e estável!');
+=======
+    console.log('Caderninho Digital Pro carregado com sincronização reversa!');
+>>>>>>> 77196693fba5fd17291ffda77e99d1296d253e83
   </script>
 </body>
 </html>
