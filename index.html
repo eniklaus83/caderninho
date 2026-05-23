@@ -187,4 +187,123 @@
             document.getElementById('modal-billing').classList.remove('hidden');
         }
 
-function closeBillingModal() { document.getElementById('modal-billing').classList.add('hidden'); activeClientId = null; }function executeDebit(price, name) {const client = DATABASE.clients.find(c => c.id == activeClientId);if (client.balance >= price) {client.balance -= price;document.getElementById('billing-client-balance').innerText = "R$ " + client.balance.toFixed(2).replace('.', ',');renderConsumptionView();pushToGitHub();if (client.balance <= 0) closeBillingModal();} else {triggerToast();}}function renderCreditView() {const container = document.getElementById('credit-list');if(DATABASE.clients.length === 0) { container.innerHTML = 'Nenhum cliente cadastrado.'; return; }container.innerHTML = DATABASE.clients.map(c => <div onclick="triggerAddCreditFlow('\'' + c.id + '\'')" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex justify-between items-center cursor-pointer hover:border-slate-700 transition-all"> <div><h4 class="font-bold text-slate-200 text-sm">${c.name}</h4><p class="text-xs font-mono text-slate-400">Saldo: R$ ${c.balance.toFixed(2).replace('.', ',')}</p></div> <button class="bg-emerald-600 text-white font-black text-xs px-4 py-3 rounded-xl"><i data-lucide="plus" class="w-3.5 h-3.5"></i> ADICIONAR</button> </div>).join('');lucide.createIcons();}function triggerAddCreditFlow(id) {const client = DATABASE.clients.find(c => c.id == id);const value = parseFloat(prompt("Quanto de crédito R$ para colocar na conta de: " + client.name + "?"));if (isNaN(value) || value <= 0) return;client.balance += value;renderCreditView();pushToGitHub();}function addClient() {const input = document.getElementById('input-client-name');const val = input.value.trim();if (!val) return;DATABASE.clients.push({ id: Date.now().toString(), name: val, balance: 0.00 });input.value = '';renderClientsView();pushToGitHub();}function renderClientsView() {document.getElementById('clients-registry-list').innerHTML = DATABASE.clients.map(c => <div class="bg-slate-900 p-3 rounded-xl flex justify-between items-center text-sm border border-slate-800"> <span class="font-bold text-slate-300">${c.name}</span> <button onclick="deleteClient('${c.id}')" class="text-rose-400 p-1 hover:bg-rose-500/10 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4"></i></button> </div>).join('');lucide.createIcons();}function deleteClient(id) {if(confirm("Remover este cliente permanentemente?")) {DATABASE.clients = DATABASE.clients.filter(c => c.id != id);renderClientsView();pushToGitHub();}}function addProduct() {const nameInput = document.getElementById('input-product-name');const priceInput = document.getElementById('input-product-price');const price = parseFloat(priceInput.value);const name = nameInput.value.trim();if (!name || isNaN(price)) return;DATABASE.products.push({ id: Date.now().toString(), name: name, price: price });nameInput.value = ''; priceInput.value = '';renderProductsView();pushToGitHub();}function renderProductsView() {document.getElementById('products-registry-list').innerHTML = DATABASE.products.map(p => <div class="bg-slate-900 p-3 rounded-xl flex justify-between items-center text-sm border border-slate-800"> <span class="font-medium text-slate-300">${p.name}</span> <div class="flex items-center gap-3"> <span class="text-amber-400 font-mono font-bold">R$ ${p.price.toFixed(2).replace('.', ',')}</span> <button onclick="deleteProduct('${p.id}')" class="text-rose-400 p-1 hover:bg-rose-500/10 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4"></i></button> </div> </div>).join('');lucide.createIcons();}function deleteProduct(id) {if(confirm("Excluir este produto do catálogo?")) {DATABASE.products = DATABASE.products.filter(p => p.id != id);renderProductsView();pushToGitHub();}}function triggerToast() {const toast = document.getElementById('toast');toast.style.opacity = "1";setTimeout(function() { toast.style.opacity = "0"; }, 2500);}fetchFromGitHub();
+function closeBillingModal() { 
+    document.getElementById('modal-billing').classList.add('hidden'); 
+    activeClientId = null; 
+}
+
+function executeDebit(price, name) {
+    var client = DATABASE.clients.find(function(c) { return c.id == activeClientId; });
+    if (client.balance >= price) {
+        client.balance -= price;
+        document.getElementById('billing-client-balance').innerText = "R$ " + client.balance.toFixed(2).replace('.', ',');
+        renderConsumptionView();
+        pushToGitHub();
+        if (client.balance <= 0) closeBillingModal();
+    } else {
+        triggerToast();
+    }
+}
+
+function renderCreditView() {
+    var container = document.getElementById('credit-list');
+    if(DATABASE.clients.length === 0) { 
+        container.innerHTML = 'Nenhum cliente cadastrado.'; 
+        return; 
+    }
+    container.innerHTML = DATABASE.clients.map(function(c) {
+        return '<div onclick="triggerAddCreditFlow(\'' + c.id + '\')" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex justify-between items-center cursor-pointer hover:border-slate-700 transition-all">' +
+               '  <div><h4 class="font-bold text-slate-200 text-sm">' + c.name + '</h4><p class="text-xs font-mono text-slate-400">Saldo: R$ ' + c.balance.toFixed(2).replace('.', ',') + '</p></div>' +
+               '  <button class="bg-emerald-600 text-white font-black text-xs px-4 py-3 rounded-xl"><i data-lucide="plus" class="w-3.5 h-3.5"></i> ADICIONAR</button>' +
+               '</div>';
+    }).join('');
+    lucide.createIcons();
+}
+
+function triggerAddCreditFlow(id) {
+    var client = DATABASE.clients.find(function(c) { return c.id == id; });
+    var value = parseFloat(prompt("Quanto de crédito R$ para colocar na conta de: " + client.name + "?"));
+    if (isNaN(value) || value <= 0) return;
+    client.balance += value;
+    renderCreditView();
+    pushToGitHub();
+}
+
+function addClient() {
+    var input = document.getElementById('input-client-name');
+    var val = input.value.trim();
+    if (!val) return;
+    DATABASE.clients.push({ id: Date.now().toString(), name: val, balance: 0.00 });
+    input.value = '';
+    renderClientsView();
+    pushToGitHub();
+}
+
+function renderClientsView() {
+    var container = document.getElementById('clients-registry-list');
+    if(DATABASE.clients.length === 0) {
+        container.innerHTML = 'Nenhum cliente cadastrado.';
+        return;
+    }
+    container.innerHTML = DATABASE.clients.map(function(c) {
+        return '<div class="bg-slate-900 p-3 rounded-xl flex justify-between items-center text-sm border border-slate-800">' +
+               '  <span class="font-bold text-slate-300">' + c.name + '</span>' +
+               '  <button onclick="deleteClient(\'' + c.id + '\')" class="text-rose-400 p-1 hover:bg-rose-500/10 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4"></i></button>' +
+               '</div>';
+    }).join('');
+    lucide.createIcons();
+}
+
+function deleteClient(id) {
+    if(confirm("Remover este cliente permanentemente?")) {
+        DATABASE.clients = DATABASE.clients.filter(function(c) { return c.id != id; });
+        renderClientsView();
+        pushToGitHub();
+    }
+}
+
+function addProduct() {
+    var nameInput = document.getElementById('input-product-name');
+    var priceInput = document.getElementById('input-product-price');
+    var price = parseFloat(priceInput.value);
+    var name = nameInput.value.trim();
+    if (!name || isNaN(price)) return;
+    DATABASE.products.push({ id: Date.now().toString(), name: name, price: price });
+    nameInput.value = ''; priceInput.value = '';
+    renderProductsView();
+    pushToGitHub();
+}
+
+function renderProductsView() {
+    var container = document.getElementById('products-registry-list');
+    if(DATABASE.products.length === 0) {
+        container.innerHTML = 'Nenhum produto cadastrado.';
+        return;
+    }
+    container.innerHTML = DATABASE.products.map(function(p) {
+        return '<div class="bg-slate-900 p-3 rounded-xl flex justify-between items-center text-sm border border-slate-800">' +
+               '  <span class="font-medium text-slate-300">' + p.name + '</span>' +
+               '  <div class="flex items-center gap-3">' +
+               '    <span class="text-amber-400 font-mono font-bold">R$ ' + p.price.toFixed(2).replace('.', ',') + '</span>' +
+               '    <button onclick="deleteProduct(\'' + p.id + '\')" class="text-rose-400 p-1 hover:bg-rose-500/10 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4"></i></button>' +
+               '  </div>' +
+               '</div>';
+    }).join('');
+    lucide.createIcons();
+}
+
+function deleteProduct(id) {
+    if(confirm("Excluir este produto do catálogo?")) {
+        DATABASE.products = DATABASE.products.filter(function(p) { return p.id != id; });
+        renderProductsView();
+        pushToGitHub();
+    }
+}
+
+function triggerToast() {
+    var toast = document.getElementById('toast');
+    toast.style.opacity = "1";
+    setTimeout(function() { toast.style.opacity = "0"; }, 2500);
+}
+
+fetchFromGitHub();
