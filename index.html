@@ -592,6 +592,8 @@
       DB.clients = DB.clients.filter(c => c.id !== id);
       salvarDados();
       showToast('Cliente excluído.', 'success');
+	  syncWithGitHub()
+	  showToast(id ? 'Dados Atualizados!' : 'GitHub!', 'success');
     }
 
     // ========== PRODUTOS ==========
@@ -696,6 +698,8 @@
       salvarDados();
       atualizarSelectProdutos();
       showToast('Produto excluído.', 'success');
+	  syncWithGitHub()
+	  showToast(id ? 'Dados Atualizados!' : 'GitHub!', 'success');
     }
 
     function atualizarSelectProdutos() {
@@ -866,6 +870,8 @@
       atualizarCarrinho();
       showToast('Pedido confirmado!', 'success');
       document.getElementById('consumoClienteNome').textContent = DB.clients[clienteIdx].name + ' (Saldo: R$ ' + DB.clients[clienteIdx].balance.toFixed(2) + ')';
+	  syncWithGitHub()
+	  showToast(id ? 'Dados Atualizados!' : 'GitHub!', 'success');
     }
 
     // ========== CRÉDITO/DÉBITO ==========
@@ -937,6 +943,8 @@
       document.getElementById('creditoSaldoAtual').textContent = 'Saldo: R$ ' + DB.clients[clienteIdx].balance.toFixed(2);
       document.getElementById('creditoValor').value = '';
       showToast('Operação realizada!', 'success');
+	  syncWithGitHub()
+	  showToast(id ? 'Dados Atualizados!' : 'GitHub!', 'success');
     }
 
     // ========== PEDIDOS ==========
