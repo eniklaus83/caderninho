@@ -53,7 +53,7 @@
     {
       "id": "mplen8pkqu4fi",
       "name": "Oliver Santos",
-      "balance": 50
+      "balance": 41.5
     }
   ],
   "products": [
@@ -210,6 +210,27 @@
       ],
       "total": 2.5,
       "date": "2026-05-23T23:43:12.821Z"
+    },
+    {
+      "id": "mplenlzpw5yot",
+      "clientId": "mplen8pkqu4fi",
+      "clientName": "Oliver Santos",
+      "items": [
+        {
+          "productId": "prod_salgado_011",
+          "name": "Pastel de Queijo",
+          "price": 4.5,
+          "qty": 1
+        },
+        {
+          "productId": "prod_refrigerante_003",
+          "name": "Fanta Uva Lata 350ml",
+          "price": 4,
+          "qty": 1
+        }
+      ],
+      "total": 8.5,
+      "date": "2026-05-25T16:12:54.421Z"
     }
   ]
 }
