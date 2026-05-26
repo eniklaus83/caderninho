@@ -3,7 +3,7 @@
     {
       "id": "mpiw592ke719t",
       "name": "Ernesto Niklaus (Benjamin)",
-      "balance": 30
+      "balance": 21
     },
     {
       "id": "mpiw5jvws24k2",
@@ -258,6 +258,27 @@
       ],
       "total": 69,
       "date": "2026-05-25T16:13:27.119Z"
+    },
+    {
+      "id": "mplxeqgtwxul4",
+      "clientId": "mpiw592ke719t",
+      "clientName": "Ernesto Niklaus (Benjamin)",
+      "items": [
+        {
+          "productId": "prod_refrigerante_003",
+          "name": "Fanta Uva Lata 350ml",
+          "price": 4,
+          "qty": 1
+        },
+        {
+          "productId": "prod_salgado_009",
+          "name": "Coxinha de Frango",
+          "price": 5,
+          "qty": 1
+        }
+      ],
+      "total": 9,
+      "date": "2026-05-26T00:57:53.021Z"
     }
   ]
 }
