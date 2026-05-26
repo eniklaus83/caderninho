@@ -58,7 +58,7 @@
     {
       "id": "mplxfbaj7b9hr",
       "name": "Andrerson",
-      "balance": 50
+      "balance": 35.5
     }
   ],
   "products": [
@@ -284,6 +284,27 @@
       ],
       "total": 9,
       "date": "2026-05-26T00:57:53.021Z"
+    },
+    {
+      "id": "mplxfnuz3aw1p",
+      "clientId": "mplxfbaj7b9hr",
+      "clientName": "Andrerson",
+      "items": [
+        {
+          "productId": "prod_refrigerante_001",
+          "name": "Coca-Cola Lata 350ml",
+          "price": 4.5,
+          "qty": 1
+        },
+        {
+          "productId": "mpiysw3cm9ouq",
+          "name": "Pastel de Carne",
+          "price": 10,
+          "qty": 1
+        }
+      ],
+      "total": 14.5,
+      "date": "2026-05-26T00:58:36.299Z"
     }
   ]
 }
